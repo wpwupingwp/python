@@ -9,7 +9,7 @@ import argparse
 
 def function(parameters):
     string, filename = parameters
-    string = string.replace('%i', '{}')
+    string = string.replace('%i', '{0}')
     string = string.format(filename)
     print(string)
     run(string, shell=True)
