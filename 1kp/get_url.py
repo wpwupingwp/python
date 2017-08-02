@@ -1,6 +1,18 @@
 #!/usr/bin/python3
 
-from sys import argv
+import os
+from urllib import request
+
+
+def down():
+    URL = r'http://www.onekp.com/public_data.html'
+
+    raw = request.urlopen(URL)
+    if raw.code != '200':
+        raise Exception('Cannot open {}. Quit now.'.format(URL)
+    with open('public_data.html', 'w') as output:
+        output.write(raw.read())
+
 
 
 info = list()
