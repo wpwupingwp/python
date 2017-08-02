@@ -24,8 +24,8 @@ for name, *_, url in url_list:
     if get.code != 200:
         fail.write('{}\t{}\n'.format(name, url))
         continue
-    with open(name, 'w') as output:
-        output.write(get.read().decode('utf-8'))
+    with open(name, 'wb') as output:
+        output.write(get.read())
 
 fail.close()
 print('Done.')
