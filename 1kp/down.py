@@ -5,6 +5,7 @@ from sys import argv
 from urllib import request
 from urllib.error import URLError
 
+print('URL list looks like\nname\taddress\n')
 url_list = list()
 fail = open('fail.log', 'w')
 with open(argv[1], 'r') as raw:
@@ -13,7 +14,7 @@ with open(argv[1], 'r') as raw:
         # use default splitter
         url_list.append(line.split())
 
-for name, url in url_list:
+for name, *_, url in url_list:
     try:
         get = request.urlopen(url)
     except URLError:
@@ -27,3 +28,4 @@ for name, url in url_list:
         output.write(get.read().decode('utf-8'))
 
 fail.close()
+print('Done.')
