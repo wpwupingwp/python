@@ -219,3 +219,5 @@ ModelManifest.xml
 *.swp
 *.gb
 *.fastq
+1kp/
+test/
