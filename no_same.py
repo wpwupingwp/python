@@ -35,7 +35,6 @@ def main():
             hash_dict[hash_text].append(record)
         else:
             hash_dict[hash_text] = [record, ]
-    print('Duplicated sequences:')
     log = open(argv[1]+'.log', 'w')
     for record in hash_dict.values():
         output.append(record[0])
@@ -43,13 +42,13 @@ def main():
         if len(record) != 1:
             id_list = [i.id for i in record]
             log.write('\t'.join(id_list)+'\n')
-    log.write('Before\t{}\tAfter\t{}\n'.format(before, after))
+    log.write('Name\tBefore\tAfter\tUniq_ratio\n')
+    log.write('{}\t{}\t{}\t{:.3f}\n'.format(argv[1], before, after,
+                                            after/before))
     with open(argv[1]+'.new', 'a') as output_file:
         SeqIO.write(output, output_file, file_format)
     end = timer()
-    print('Total {} sequences in {} format.'.format(before, file_format))
-    print('{} sequences left in the file {}.new.'.format(after, argv[1]))
-    print('Cost {:.3f} seconds.'.format(end-start))
+    print('Done with {:.3f} seconds.'.format(end-start))
 
 
 if __name__ == '__main__':
