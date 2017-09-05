@@ -20,4 +20,5 @@ for l, r in zip(left, right):
     quality = '{}{}{}'.format(l_qual, 'A'*length, r_qual[::-1])
     name = l.description
     handle.write('@{0}\n{1}\n+\n{2}\n'.format(name, sequence, quality))
+
 print('Done.')
