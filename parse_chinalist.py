@@ -18,6 +18,11 @@ for page in files:
         print(name)
         # name = text.strip()
         name_list = name.split(' ')
-        genus, species, *ssp = name_list
-        ssp = ' ' .join(ssp)
+        genus, species, ssp, *etc = name_list
+        if genus == '×':
+            genus = ''.join([genus, species])
+            species = ssp
+            ssp = ' '.join(etc)
+        else:
+            ssp = ssp + ' '.join(etc)
         output.write('{}\t{}\t{}\n'.format(genus, species, ssp))
