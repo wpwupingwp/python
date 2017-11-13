@@ -8,9 +8,10 @@ with open('apikey', 'r') as _:
 output = open('info.json', 'w')
 with open('./list.csv', 'r') as _:
     for index, line in enumerate(_):
-        nameid = line.split('\t')[0]
+        nameid = line.strip().split('\t')[0]
         params = {'apikey': apikey, 'format': 'json'}
         a = requests.get(url.format(nameid), params=params)
+        print(a.url)
         info = a.text
         output.write(info)
         output.write('\n')
