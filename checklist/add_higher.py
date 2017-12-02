@@ -14,8 +14,8 @@ with open('./genus_info', 'r') as raw:
     for line in raw:
         info = line.split('\t')
         genus = info[0]
-        if genus not in genus_list:
-            continue
+        # if genus not in genus_list:
+        #     continue
         family = ''
         order = ''
         kind = ''
