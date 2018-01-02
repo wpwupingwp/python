@@ -4,7 +4,7 @@ from sys import argv
 import re
 
 
-pattern = re.compile(r"(^'?.+'?) +([ATCG\?-]{20})")
+pattern = re.compile(r"(^'?.+'?) +([ATCGN\?-]{20})")
 with open(argv[1], 'r') as old, open(argv[1]+'.new', 'w') as new:
     for line in old:
         a = re.search(pattern, line)
