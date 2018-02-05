@@ -2,7 +2,7 @@
 
 import re
 
-pattern = re.compile(r'/(\d+_\d?).*:(\d+)')
+pattern = re.compile(r'\D(\d+_\d?).*:(\d+)')
 with open('./its.log', 'r') as _:
     raw = re.findall(pattern, _.read())
     its = {i[0]: i[1] for i in raw}
