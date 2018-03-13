@@ -6,20 +6,16 @@ from requests import request
 with open('key', 'r') as _:
     login = _.read().strip().split(' ')
     login = tuple(login)
-get_tag_detal = """
-<?xml version="1.0" encoding="utf-8" ?>
-<a:propfind xmlns:a="DAV:" xmlns:oc="http://owncloud.org/ns">
-  <a:prop>
-    <!-- Retrieve the display-name, user-visible, and user-assignable properties -->
-    <oc:display-name/>
-    <oc:user-visible/>
-    <oc:user-assignable/>
-    <oc:id/>
-  </a:prop>
-</a:propfind>
-"""
 a = request('PROPFIND',
             'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/systemtags',
-            auth=login)
+            auth=login, data=open('./get_tag_detail.xml', 'rb'))
 b = etree.fromstring(a.text)
-print(b)
+nsmap = b.nsmap
+c = b.findall('*//d:prop', namespaces=nsmap)
+tag = dict()
+for i in c:
+    i_id = i.find('oc:id', namespaces=nsmap)
+    i_name = i.find('oc:display-name', namespaces=nsmap)
+    tag[i_id.text] = i_name.text
+#print(b.text)
+print(*tag.items())
