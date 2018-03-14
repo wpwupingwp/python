@@ -27,7 +27,6 @@ def get_tag_info(url, user, passwd):
 def get_tag_id(fileid, url, user, passwd):
     url = url + fileid
     _, href = get_tag_info(url, user, passwd)
-    print(*href, end='\n')
 
 
 def create_tag(tag_name, url, user, passwd):
@@ -57,11 +56,37 @@ def get_fileid(path, url, user, passwd):
         filename = Path(fullname).name.__str__()
         #fileid = i.find('d:propstat/d:prop/oc:fileid', namespaces=nsmap)
         fileid = i.find('*//oc:fileid', namespaces=nsmap).text
-        file_dict[filename] = fileid
+        file_dict[unquote(filename)] = fileid
     return file_dict
 
 
-
+def get_table(table_file):
+    table = list()
+    with open(table_file, 'r') as raw:
+        raw.readline()
+        for line in raw:
+            line = line.split(',')
+            index = int(line[0])
+            filename = '{}_{}'.format(*line[1:3])
+            leixing = line[3]
+            leixing = '1-{}'.format(leixing)
+            banzou = line[4]
+            banzou = '2-{}伴奏'.format(banzou)
+            yuyan = line[5]
+            if '&' in yuyan:
+                yuyan = yuyan.split('&')
+                yuyan = ['3-{}'.format(i) for i in yuyan]
+            else:
+                yuyan = ['3-{}'.format(yuyan)]
+            lingchang_raw = line[6]
+            lingchang = list()
+            for i in lingchang_raw:
+                if i == '无':
+                    lingchang.append('4-无领唱')
+                else:
+                    lingchang.append('4-{}. solo'.format(i))
+            table.append([index, filename, leixing, banzou, *yuyan, *lingchang])
+    return table
 
 
 def main():
@@ -72,9 +97,24 @@ def main():
     with open('key', 'r') as _:
         raw = _.read().strip().split(' ')
         user, passwd = raw
-    tag_dict = get_tag_info(tag_url, user, passwd)
+    tag_dict, _ = get_tag_info(tag_url, user, passwd)
     filename_id_dict = get_fileid(folder, list_url, user, passwd)
-    get_tag_id(i, file_tag_url, user, passwd)
+    # get_tag_id(fileid, file_tag_url, user, passwd)
+    table = get_table('./table.csv')
+    miss = list()
+    for i in table:
+        tag_id_to = list()
+        for j in i[2:]:
+            tag_id_to.append(tag_dict[j])
+        try:
+            print(i[0], i[1], filename_id_dict[i[1]], i[2:], tag_id_to)
+        except KeyError:
+            miss.append([i[0], i[1]])
+
+    print(*table[220:235], sep='\n')
+    print('MISSING:')
+    for i in miss:
+        print(*i)
     # tag_id = input('Enter tag id to list file:')
     # list_file_by_tag(tag_id, list_url, auth)
     # tag_name = input('Enter new tag name:')
