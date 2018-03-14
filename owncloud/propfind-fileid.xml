@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<a:propfind xmlns:a="DAV:" xmlns:oc="http://owncloud.org/ns">
+    <!-- retrieve the file's id -->
+    <a:prop><oc:fileid/></a:prop>
+</a:propfind>

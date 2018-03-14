@@ -89,6 +89,12 @@ def get_table(table_file):
     return table
 
 
+def assign_tag(fileid, tagid, url, user, passwd):
+    r = request('PUT', '{}/{}/{}'.format(url, fileid, tagid),
+                auth=(user, passwd))
+    print(fileid, tagid, r.status_code)
+
+
 def main():
     tag_url = 'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/systemtags'
     list_url = 'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/files'
@@ -101,20 +107,26 @@ def main():
     filename_id_dict = get_fileid(folder, list_url, user, passwd)
     # get_tag_id(fileid, file_tag_url, user, passwd)
     table = get_table('./table.csv')
+    todo = list()
     miss = list()
     for i in table:
         tag_id_to = list()
         for j in i[2:]:
             tag_id_to.append(tag_dict[j])
         try:
-            print(i[0], i[1], filename_id_dict[i[1]], i[2:], tag_id_to)
+            # index, filename, fileid, tagids
+            todo.append([i[0], i[1], filename_id_dict[i[1]], i[2:], tag_id_to])
         except KeyError:
+            todo.append([i[0], i[1]])
             miss.append([i[0], i[1]])
 
-    print(*table[220:235], sep='\n')
-    print('MISSING:')
-    for i in miss:
-        print(*i)
+    todo_me = todo[220:235]
+    print(*todo_me)
+    for record in todo_me:
+        fileid, tagids = record[2], record[-1]
+        for tagid in tagids:
+            assign_tag(fileid, tagid, file_tag_url, user, passwd)
+
     # tag_id = input('Enter tag id to list file:')
     # list_file_by_tag(tag_id, list_url, auth)
     # tag_name = input('Enter new tag name:')
