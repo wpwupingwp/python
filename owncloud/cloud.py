@@ -7,19 +7,27 @@ from pathlib import Path
 import json
 
 
-def get_tag_list(url, user, passwd):
+def get_tag_info(url, user, passwd):
     r = request('PROPFIND', url, auth=(user, passwd),
                 data=open('./propfind-tagid.xml', 'rb'))
-    xml = etree.fromstring(r.text)
+    xml = etree.fromstring(r.content)
     nsmap = xml.nsmap
-    prop = xml.findall('*//d:prop', namespaces=nsmap)
+    response = xml.findall('d:response', namespaces=nsmap)
     # name:id
     tag_dict = dict()
-    for i in prop:
-        i_id = i.find('oc:id', namespaces=nsmap)
-        i_name = i.find('oc:display-name', namespaces=nsmap)
+    href = list()
+    for i in response:
+        i_id = i.find('*//oc:id', namespaces=nsmap)
+        i_name = i.find('*//oc:display-name', namespaces=nsmap)
         tag_dict[i_name.text] = i_id.text
-    return tag_dict
+        href.append(i.find('d:href', namespaces=nsmap).text)
+    return tag_dict, href
+
+
+def get_tag_id(fileid, url, user, passwd):
+    url = url + fileid
+    _, href = get_tag_info(url, user, passwd)
+    print(*href, end='\n')
 
 
 def create_tag(tag_name, url, user, passwd):
@@ -29,12 +37,10 @@ def create_tag(tag_name, url, user, passwd):
     headers = {'content-type': 'application/json'}
     r = request('POST', url, auth=(user, passwd), data=json.dumps(d),
                 headers=headers)
-    print(r.text)
 
 
 def delete_tag(tag_id, url, auth):
     r = request('DELETE', url+'/{}'.format(tag_id), auth=auth)
-    print(r.text)
 
 
 def get_fileid(path, url, user, passwd):
@@ -52,20 +58,23 @@ def get_fileid(path, url, user, passwd):
         #fileid = i.find('d:propstat/d:prop/oc:fileid', namespaces=nsmap)
         fileid = i.find('*//oc:fileid', namespaces=nsmap).text
         file_dict[filename] = fileid
-    for i in file_dict.items():
-        print(unquote(i[0]), i[1])
+    return file_dict
+
+
 
 
 
 def main():
     tag_url = 'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/systemtags'
     list_url = 'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/files'
+    file_tag_url = 'https://phdchorus.ucas.ac.cn/owncloud/remote.php/dav/systemtags-relations/files/'
     folder = '01___薄荷曲库___01'
     with open('key', 'r') as _:
         raw = _.read().strip().split(' ')
         user, passwd = raw
-    tag_dict = get_tag_list(tag_url, user, passwd)
-    get_fileid(folder, list_url, user, passwd)
+    tag_dict = get_tag_info(tag_url, user, passwd)
+    filename_id_dict = get_fileid(folder, list_url, user, passwd)
+    get_tag_id(i, file_tag_url, user, passwd)
     # tag_id = input('Enter tag id to list file:')
     # list_file_by_tag(tag_id, list_url, auth)
     # tag_name = input('Enter new tag name:')
