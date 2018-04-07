@@ -21,8 +21,8 @@ def main():
     arg = argparse.ArgumentParser()
     arg.add_argument('command',
                      help='command to run, use "$i" to stand for file name')
-    arg.add_argument('files')
-    arg.add_argument('-cpu', default=cpu_count()-1, help='CPU cores to use')
+    arg.add_argument('-f', '--files')
+    arg.add_argument('-c', '--cpu', type=int, default=cpu_count()-1)
     arg = arg.parse_args()
     print(arg)
 
@@ -30,9 +30,11 @@ def main():
     tasks = [(arg.command, i) for i in files]
     pool = Pool(arg.cpu)
     result = pool.map(function, tasks)
+    for i in result:
+        if i is not None:
+            print(i)
     pool.terminate()
     pool.join()
-    print(result)
     end = timer()
 
     print('\nFinished with {0:.3f}s.\n'.format(end-start))

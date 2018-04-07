@@ -120,12 +120,13 @@ def main():
             todo.append([i[0], i[1]])
             miss.append([i[0], i[1]])
 
-    todo_me = todo[220:235]
-    print(*todo_me)
+    todo_me = todo
     for record in todo_me:
+        print(record)
         fileid, tagids = record[2], record[-1]
         for tagid in tagids:
             assign_tag(fileid, tagid, file_tag_url, user, passwd)
+    print(*miss)
 
     # tag_id = input('Enter tag id to list file:')
     # list_file_by_tag(tag_id, list_url, auth)
