@@ -15,7 +15,7 @@ with open(argv[1], 'r') as raw:
             good_barcode = False
         else:
             good_barcode = True
-        match = re.search(pattern, line)
+        match = re.search(pattern, line, re.BESTMATCH)
         if match is None:
             mismatch = ''
             loc = ('', '')
