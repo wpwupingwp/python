@@ -5,7 +5,7 @@ from sys import argv
 
 tag = 'GTAGACTGCGTACC'
 max_mismatch = 3
-pattern = re.compile(r'({}){{e<={}}}'.format(tag, max_mismatch))
+pattern = re.compile(r'({}){{e<={}}}'.format(tag, max_mismatch), re.BESTMATCH)
 pattern2 = re.compile(r'^(\w{5})\1')
 print('Seq,GoodBarcode,Mismatch,Start,End')
 with open(argv[1], 'r') as raw:
@@ -15,7 +15,7 @@ with open(argv[1], 'r') as raw:
             good_barcode = False
         else:
             good_barcode = True
-        match = re.search(pattern, line, re.BESTMATCH)
+        match = re.search(pattern, line)
         if match is None:
             mismatch = ''
             loc = ('', '')
