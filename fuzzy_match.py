@@ -21,5 +21,5 @@ with open(argv[1], 'r') as raw:
             loc = ('', '')
         else:
             mismatch = sum(match.fuzzy_counts)
-            loc = match.span()
+            loc = [int(i)+1 for i in match.span()]
         print(line[:-1], str(good_barcode), mismatch, *loc, sep=',')
