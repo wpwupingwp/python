@@ -135,16 +135,27 @@ Trim fragment in given fasta file, or replace trimmed bases with 'N'.
 
 ### Usage
 
-> python3 trim.py input.fasta start-end -n
+> python3 trim.py input.fasta from:to
 
-Here _start_ and _end_ are integers, and end could larger than length of
-sequence if you want to cut off sequence's tail.
-
-If you set option "-n", then all bases you want to trim will become "N".
+Here _from_ and _to_ are integers which represents region you want to cut off.
+If you want to cut tail of sequence and you do not know specific length of
+sequence, you can use negative _from_  with a big _to_ to handle it. For
+instance, "-20:10000" means cut last 20 bases -- assumes that every sequence
+you give shorter than 10000.
 
 ### Example
 
-> python3 trim.py rbcL.fasta 200-250
+- Cut middle
+
+> python3 trim.py rbcL.fasta 100:150
+
+- Cut head
+
+> python3 trim.py rbcL.fasta 1:24
+
+> Cut tail
+
+> python3 trim.py rbcL.fasta "-5:1000000"
 
 ## no_same.py
 
