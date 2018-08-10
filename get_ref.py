@@ -44,5 +44,9 @@ for fasta in a:
         i = records[0]
         blast_id, order, family, genus = get_id(i.id)
         handle.close()
-        run('cat {} /tmp/trnLF_out/{}.fasta >> {}-merge.fasta'.format(
-            fasta, genus, fasta), shell=True)
+        run('python3 ~/git/rename/uniq.py -c 5'
+            ' /tmp/trnLF_out/{}.fasta'.format(family), shell=True)
+        run('cat {} /tmp/trnLF_out/{}.fasta.uniq >> {}-merge.fasta'.format(
+            fasta, family, fasta), shell=True)
+        # run('cat {} /tmp/trnLF_out/{}.fasta /tmp/trnLF_out/{}.fasta.uniq >> {}-merge.fasta'.format(
+        #     fasta, genus, family, fasta), shell=True)
