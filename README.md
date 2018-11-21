@@ -203,6 +203,16 @@ coverage info in sequence id.
 **Warning: This program use regular expression to recognize infomation, it may
 generate wrong output when it was used on other sequence if format.**
 
+## nex_for_mb.py
+
+Convert alignment file to nexus file that Mrbayes could use.
+
+Only support fasta format. Sequence ID longer than 90 will be cutted
+
+```
+python3 nex_for_mb.py fasta_file_name
+```
+
 # old
 
 Some old code.
