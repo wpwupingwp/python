@@ -24,7 +24,7 @@ class Card:
         # return f'{chr(self.unicode())} {self._suits_d[self.suit]} {
         # self.rank}'
 
-    def unicode(self):
+    def __unicode__(self):
         offset = 0x1f0a0
         if self == Card('White', 'joker'):
             return 0x1f0df
