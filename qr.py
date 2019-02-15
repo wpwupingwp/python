@@ -4,4 +4,4 @@ from pyqrcode import create
 from sys import argv
 
 a = create(argv[1])
-a.show()
+a.png('a.png')

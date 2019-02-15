@@ -5,6 +5,7 @@
 from subprocess import run
 from sys import argv
 from Bio import SeqIO
+from os import remove
 
 n = 1
 fasta = 'tmp.fasta'
@@ -22,3 +23,6 @@ for record in SeqIO.parse(cluster, 'fasta'):
     else:
         SeqIO.write(record, handle, 'fasta')
 print(f'Split into {n-1} files.')
+handle.close()
+remove(fasta)
+remove(cluster)
