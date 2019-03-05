@@ -1,23 +1,24 @@
 #!/usr/bin/python3
 
 import argparse
-from functools import wraps
-from timeit import default_timer as timer
+import logging
 
 
-def print_time(function):
-    @wraps(function)
-    def wrapper(*args, **kargs):
-        start = timer()
-        result = function(*args, **kargs)
-        end = timer()
-        print('The function {0} Cost {1:3f}s.\n'.format(
-            function.__name__, end-start))
-        return result
-    return wrapper
+# define logger
+FMT = '%(asctime)s %(levelname)-8s %(message)s'
+DATEFMT = '%I:%M:%S'
+TEMP_LOG = 'Temp.log'
+logging.basicConfig(format=FMT, datefmt=DATEFMT, level=logging.INFO,
+                    handlers=[logging.StreamHandler(),
+                              logging.FileHandler(TEMP_LOG)])
+try:
+    import coloredlogs
+    coloredlogs.install(level=logging.INFO, fmt=FMT, datefmt=DATEFMT)
+except ImportError:
+    pass
+log = logging.getLogger(__name__)
 
 
-@print_time
 def function():
     pass
 
@@ -28,20 +29,20 @@ def parse_args():
         description=main.__doc__)
     arg.add_argument('-o', '--out', default='out',
                      help='output directory')
-    arg.print_help()
     return arg.parse_args()
 
 
 def main():
-    """docstring
     """
-    start = timer()
+    Docstring.
+    """
     arg = parse_args()
+    log.info('test')
+    log.info(arg)
     # start here
     function()
     # end
-    end = timer()
-    print('Cost {:.3f} seconds.'.format(end-start))
+    log.info('bye')
 
 
 if __name__ == '__main__':
