@@ -9,7 +9,7 @@ import argparse
 
 def function(parameters):
     string, filename = parameters
-    string = string.replace('%i', '{0}')
+    string = string.replace('files', '{0}')
     string = string.format(filename)
     print(string)
     run(string, shell=True)
@@ -20,7 +20,7 @@ def main():
     start = timer()
     arg = argparse.ArgumentParser()
     arg.add_argument('command',
-                     help='command to run, use "$i" to stand for file name')
+                     help='command to run, use "files" to stand for file name')
     arg.add_argument('-f', '--files')
     arg.add_argument('-c', '--cpu', type=int, default=cpu_count()-1)
     arg = arg.parse_args()
