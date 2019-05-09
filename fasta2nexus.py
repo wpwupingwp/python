@@ -10,7 +10,7 @@ import argparse
 
 def get_format(arg):
     with open(arg.input[0], 'r') as _:
-        head = _.raedline()
+        head = _.readline()
         if head.lower().startswith('#nexus'):
             return 'nexus'
         elif head.startswith('>'):
@@ -22,9 +22,10 @@ def get_format(arg):
 def convert(arg):
     nexus_files = []
     for i in arg.input:
-        AlignIO.convert(i, 'fasta', i+'.nexus', 'nexus',
+        nex = i + '.nexus'
+        AlignIO.convert(i, 'fasta', nex, 'nexus',
                         alphabet=IUPAC.ambiguous_dna)
-        nexus_files.append(i)
+        nexus_files.append(nex)
     arg.input = nexus_files
     return arg
 
@@ -46,12 +47,13 @@ def parse_args():
     arg = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=main.__doc__)
-    arg.add_argument('input', '-i', nargs='+', help='input file/files')
-    arg.add_argument('output', '-o', help='output file')
+    arg.add_argument('input', nargs='+', help='input file/files')
+    arg.add_argument('--output', '-o', help='output file')
     parsed = arg.parse_args()
     # allow asterisk
-    if len(arg.input) == 1:
-        parsed.input = list(glob(arg.input))
+    if len(parsed.input) == 1:
+        print(parsed.input[0])
+        parsed.input = list(glob(parsed.input[0]))
     return parsed
 
 
