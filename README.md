@@ -213,6 +213,14 @@ Only support fasta format. Sequence ID longer than 90 will be cutted
 python3 nex_for_mb.py fasta_file_name
 ```
 
+## fasta2nexus.py
+
+Combine fasta files into one nexus file with partition information.
+
+```
+python3 fasta2nexus.py input_files -o output_filename
+```
+
 # old
 
 Some old code.
