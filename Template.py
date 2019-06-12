@@ -2,11 +2,15 @@
 
 import argparse
 import logging
+from os import devnull
+from tempfile import TemporaryDirectory
 
-
+# Temoprary folder
+TMP = TemporaryDirectory()
+NULL = open(devnull, 'w')
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
-DATEFMT = '%I:%M:%S'
+DATEFMT = '%H:%M:%S'
 TEMP_LOG = 'Temp.log'
 logging.basicConfig(format=FMT, datefmt=DATEFMT, level=logging.INFO,
                     handlers=[logging.StreamHandler(),
