@@ -205,12 +205,12 @@ generate wrong output when it was used on other sequence if format.**
 
 ## nex_for_mb.py
 
-Convert alignment file to nexus file that Mrbayes could use.
+Remove illegal characters in sequence id for Mrbayes.
 
-Only support fasta format. Sequence ID longer than 90 will be cutted
+Only support nexus format. Sequence ID longer than 90 will be cutted
 
 ```
-python3 nex_for_mb.py fasta_file_name
+python3 nex_for_mb.py nexus_file_name
 ```
 
 ## fasta2nexus.py

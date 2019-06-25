@@ -5,8 +5,7 @@ import re
 from Bio import AlignIO
 from Bio.Alphabet import IUPAC
 
-
-raw = AlignIO.read(argv[1], 'fasta', alphabet=IUPAC.ambiguous_dna)
+raw = AlignIO.read(argv[1], 'nexus', alphabet=IUPAC.ambiguous_dna)
 pattern = re.compile(r'\W')
 for i in raw:
     i.id = re.sub(pattern, '_', i.id)
