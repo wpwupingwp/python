@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 
 from Bio import SeqIO
-from glob import glob
+from sys import argv
 
 
-for fasta in glob('*.fa*'):
-    print(fasta)
-    for record in SeqIO.parse(fasta, 'fasta'):
-        print(record.id, len(record))
-    print()
+for record in SeqIO.parse(argv[1], 'fasta'):
+    print(record.id, len(record))
