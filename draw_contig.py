@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from sys import argv
-from collections import Counter
 from matplotlib import pyplot as plt
 from numpy import logspace
 import re

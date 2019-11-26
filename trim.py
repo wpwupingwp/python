@@ -1,5 +1,4 @@
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 from timeit import default_timer as timer
 from sys import argv
 
