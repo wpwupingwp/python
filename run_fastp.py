@@ -10,8 +10,9 @@ pair = [(i, Path(str(i).replace('.R1.', '.R2.'))) for i in files]
 print(*pair, sep='\n')
 f, r = pair[0]
 f_out, r_out = [i.with_suffix('.clean') for i in pair[0]]
+report = f.with_suffix('.html')
 # -i {forward} -I {reverse} -o {forward out} -O {reverse out}
 # -A {do not cut adapter} -G {do not cut poly-G} -u {unqualified percent limt}
-# -w {number of threads}
-qc = run(f'fastp -i {f} -I {r} -o {f_out} -O {r_out} -A -G -u 30 -w {n_cpu}',
-         shell=True)
+# -w {number of threads} -h {html report file} -j {json report file}
+qc = run(f'fastp -i {f} -I {r} -o {f_out} -O {r_out} -A -G -u 30 -w {n_cpu} '
+         '-h {report}', shell=True)
