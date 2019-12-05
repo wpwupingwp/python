@@ -7,12 +7,13 @@ from multiprocessing import cpu_count
 n_cpu = max(cpu_count()//2, 1)
 files = list(Path('.').glob('*R1*.gz'))
 pair = [(i, Path(str(i).replace('.R1.', '.R2.'))) for i in files]
-print(*pair, sep='\n')
-f, r = pair[0]
-f_out, r_out = [i.with_suffix('.clean') for i in pair[0]]
-report = f.with_suffix('.html')
+for i in pair:
+    f, r = i
+    f_out, r_out = [j.with_suffix('.clean') for j in i]
+    h_report = f.with_suffix('.html')
+    j_report = f.with_suffix('.json')
 # -i {forward} -I {reverse} -o {forward out} -O {reverse out}
-# -A {do not cut adapter} -G {do not cut poly-G} -u {unqualified percent limt}
+# -A {do not cut adapter} -G {do not cut poly-G} -u {unqualified percent limit}
 # -w {number of threads} -h {html report file} -j {json report file}
-qc = run(f'fastp -i {f} -I {r} -o {f_out} -O {r_out} -A -G -u 30 -w {n_cpu} '
-         '-h {report} -j {report.with_suffix(".json")', shell=True)
+    qc = run(f'fastp -i {f} -I {r} -o {f_out} -O {r_out} -A -G -u 30 '
+             f'-w {n_cpu} -h {h_report} -j {j_report}', shell=True)
