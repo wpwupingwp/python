@@ -15,4 +15,4 @@ report = f.with_suffix('.html')
 # -A {do not cut adapter} -G {do not cut poly-G} -u {unqualified percent limt}
 # -w {number of threads} -h {html report file} -j {json report file}
 qc = run(f'fastp -i {f} -I {r} -o {f_out} -O {r_out} -A -G -u 30 -w {n_cpu} '
-         '-h {report}', shell=True)
+         '-h {report} -j {report.with_suffix(".json")', shell=True)
