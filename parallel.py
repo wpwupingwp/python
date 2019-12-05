@@ -33,7 +33,7 @@ def main():
     for i in result:
         if i is not None:
             print(i)
-    pool.terminate()
+    pool.close()
     pool.join()
     end = timer()
 
