@@ -29,8 +29,8 @@ for i, cluster in enumerate(all_cluster, 1):
         break
     filename = argv[1] + f'.{i}'
     SeqIO.write(cluster, filename, 'fasta')
+    topn -= 1
     if len(cluster) == 1:
         continue
     run(f'mafft --reorder --ep 1 {filename} > {filename}.aln',
         shell=True)
-    topn -= 1
