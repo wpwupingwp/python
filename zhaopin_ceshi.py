@@ -23,16 +23,21 @@ for i in files:
         data.append(j)
     for k in range(0, int(count*ratio)):
         to_change.append(data.pop())
-    SeqIO.write(data, i+'.mix', 'fasta')
+    SeqIO.write(data, i+'.clean', 'fasta')
     print(i, count)
 shuffle(to_change)
 len_tochange = len(to_change) // 5
 print('to change', len(to_change))
-for clean in glob('*.mix'):
-    with open(clean, 'a') as out:
-        for m in range(0, len_tochange):
-            SeqIO.write(to_change.pop(), out, 'fasta')
-        print(m)
+for fasta in glob('*.clean'):
+    clean = list(SeqIO.parse(fasta, 'fasta'))
+    dirty = []
+    for m in range(0, len_tochange):
+        dirty.append(to_change.pop())
+    print(fasta, 'clean', len(clean), 'dirty', len(dirty))
+    total = clean.extend(dirty)
+    shuffle(total)
+    with open(fasta+'.mix', 'w') as out:
+        SeqIO.write(total, out, 'fasta')
 with open('answer.txt', 'w') as out:
     out.write('gene,old,new\n')
     for line in old_new:
