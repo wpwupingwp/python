@@ -11,6 +11,8 @@ def split(raw, number):
     splitted_handle = open(splitted, 'wb')
     try:
         raw_handle = gzip.open(raw)
+        raw_handle.read(10)
+        raw_handle.seek(0)
     except Exception:
         raw_handle = open(raw, 'rb')
     line = iter(raw_handle)
@@ -31,4 +33,4 @@ def split(raw, number):
 
 
 raw, number = argv[1:]
-split(raw, number)
+split(raw, int(number))
