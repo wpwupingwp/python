@@ -34,10 +34,10 @@ for fasta in glob('*.clean'):
     for m in range(0, len_tochange):
         dirty.append(to_change.pop())
     print(fasta, 'clean', len(clean), 'dirty', len(dirty))
-    total = clean.extend(dirty)
-    shuffle(total)
+    clean.extend(dirty)
+    shuffle(clean)
     with open(fasta+'.mix', 'w') as out:
-        SeqIO.write(total, out, 'fasta')
+        SeqIO.write(clean, out, 'fasta')
 with open('answer.txt', 'w') as out:
     out.write('gene,old,new\n')
     for line in old_new:
