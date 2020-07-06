@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+from pathlib import Path
 from os import devnull
 from tempfile import TemporaryDirectory
 
@@ -41,6 +42,7 @@ def main():
     Docstring.
     """
     arg = parse_args()
+    arg.out = Path(arg.out)
     log.info('test')
     log.info(arg)
     # start here
