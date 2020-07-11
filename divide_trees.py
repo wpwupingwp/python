@@ -7,16 +7,16 @@ from pathlib import Path
 
 def parse_info(arg):
     """
-    Format of info file:
-    Type1
-    A: taxon1 taxon2 taxon3
-    B: taxon4 taxon5 taxon6
-    Type2
-    A: taxon7 taxon8 taxon9
-    B: taxon4 taxon5 taxon6
-    Type3
-    A: taxon1 taxon2 taxon3
-    B: taxon8 taxon9 taxon10
+Format of info file:
+Type1
+A:,taxon1,taxon2,taxon3
+B:,taxon4,taxon5,taxon6
+Type2
+A:,taxon7,taxon8,taxon9
+B:,taxon4,taxon5,taxon6
+Type3
+A:,taxon1,taxon2,taxon3
+B:,taxon8,taxon9,taxon10
     """
     info = dict()
     with open(arg.info) as raw:
@@ -46,7 +46,7 @@ def parse_args():
                      help='info of taxons to be clusterd')
     arg.add_argument('-folder', required=True, help='folder contains trees')
     arg.print_usage()
-    print(parse_info.__doc__）
+    print(parse_info.__doc__)
     return arg.parse_args()
 
 
