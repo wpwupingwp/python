@@ -59,6 +59,7 @@ def divide_trees(trees, info, types):
                         taxons.append(clade[0])
                 try:
                     mrca = tree.common_ancestor(*taxons)
+                    print(group, mrca!=tree.root, tree.get_path(mrca))
                 # Bio.Phylo seems raise TypeError when mrca not found
                 except Exception:
                     mrca = None
@@ -66,7 +67,6 @@ def divide_trees(trees, info, types):
                     raise
                 mrcas[group] = mrca
             mrcas_set = set(mrcas.values())
-            print(mrcas_set)
             if None in mrcas_set or len(mrcas_set) == 1:
                 continue
             else:
@@ -96,7 +96,10 @@ def main():
     info = parse_info(arg)
     types = [arg.folder/i for i in info.keys()]
     for i in types:
-        i.mkdir()
+        try:
+            i.mkdir()
+        except FileExistsError:
+            pass
     divide_trees(trees, info, types)
 
 
