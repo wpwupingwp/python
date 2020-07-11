@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 import argparse
-import logging
 from pathlib import Path
+
+from Bio import Phylo
 
 
 def parse_info(arg):
@@ -25,8 +26,9 @@ B:,taxon8,taxon9,taxon10
                 type_name = line.strip()
                 info[type_name] = dict()
                 continue
-            group_name, *taxon = line.strip().split(' ')
+            group_name, taxon = line.strip().split(' ')
             group_name = group_name.split(':')[0]
+            taxon = taxon.split(',')
             if not isinstance(taxon, list):
                 taxon = [taxon, ]
             info[type_name][group_name] = taxon
@@ -34,8 +36,42 @@ B:,taxon8,taxon9,taxon10
     return info
 
 
-def function():
-    pass
+def divide_trees(trees, info, types):
+    """
+    Args:
+        trees(list): tree files, Path()
+        info(dict): info of types, groups and taxons
+        types(list): list of Path() to output
+    """
+    for t in trees:
+        tree = Phylo.read(t, 'newick')
+        print()
+        for type_ in info:
+            mrcas = dict()
+            for group in info[type_]:
+                taxons = []
+                for i in info[type_][group]:
+                    clade = list(tree.find_clades(i))
+                    if len(clade) == 0:
+                        pass
+                        # print('\t', i, 'not found')
+                    else:
+                        taxons.append(clade[0])
+                try:
+                    mrca = tree.common_ancestor(*taxons)
+                # Bio.Phylo seems raise TypeError when mrca not found
+                except Exception:
+                    mrca = None
+                    print(f'MRCA of {group} in {type_} not found in {t}.')
+                    raise
+                mrcas[group] = mrca
+            mrcas_set = set(mrcas.values())
+            print(mrcas_set)
+            if None in mrcas_set or len(mrcas_set) == 1:
+                continue
+            else:
+                for g in mrcas:
+                    print(t, type_, g, mrcas[g]!=tree.root, mrcas[g].confidence)
 
 
 def parse_args():
@@ -55,10 +91,13 @@ def main():
     Divide trees according to type of topology.
     """
     arg = parse_args()
-    arg.out = Path(arg.out)
-    # start here
-    function()
-    # end
+    arg.folder = Path(arg.folder)
+    trees = list(arg.folder.glob('*.tre'))
+    info = parse_info(arg)
+    types = [arg.folder/i for i in info.keys()]
+    for i in types:
+        i.mkdir()
+    divide_trees(trees, info, types)
 
 
 if __name__ == '__main__':
