@@ -49,44 +49,64 @@ def divide_trees(trees, info, types):
         else:
             return 'not_root'
 
-    def get_clade(names):
-        clades = {}
+    def get_mrca(names):
+        clades = set()
         for i in names:
             clade = list(tree.find_clades(i))
             if clade:
                 clades.add(clade[0])
-        # mrca = tree.common_ancestor(*clades)
-        return clades
+        mrca = tree.common_ancestor(*clades)
+        return clades, mrca
 
+    def get_parent(root, clade):
+        if clade == root:
+            return root
+        lineage = root.get_path(clade)
+        return lineage[-2]
+
+    def like_monophyletic(lists):
+        # biopython's same-name function is too strict
+        result = {}
+        for list_ in lists:
+            copy = lists[::]
+            copy.remove(list_)
+            children = list_[1].get_terminals()
+            others = []
+            for c in copy:
+                group, mrca, clades = c
+                # only consider given group's terminals
+                others.extend(clades)
+            if len(set(children) & set(others)) == 0:
+                result[list_[0]] = True
+            else:
+                result[list_[0]] = False
+        return result
+
+    results = []
     for t in trees:
         tree = Phylo.read(t, 'newick').as_phyloxml()
         root = tree.root
         print()
-        print('tree, type, group, confidence')
         for type_ in info:
+            ok = ''
             color = ['orange', 'green', 'blue', 'red']
-            mrcas = dict()
+            terminals = []
+            mrcas = {}
             for group in info[type_]:
                 clades, mrca = get_mrca(info[type_][group])
                 for clade in clades:
                     clade.color = color[-1]
                 color.pop()
-                mrca.color = 'black'
-                purple = [i for i in tree.get_nonterminals() if
-                          i.color=='black']
-                print(purple)
-                    # print(group, mrca!=tree.root, tree.get_path(mrca))
-                # Bio.Phylo seems raise TypeError when mrca not found
-                    # print(f'MRCA of {group} in {type_} not found in {t}.')
+                terminals.append([group, mrca, clades])
                 mrcas[group] = mrca
-            Phylo.draw(tree, title=(type_,))
-            mrcas_set = set(mrcas.values())
-            if None in mrcas_set or len(mrcas_set) == 1:
-                print('####', mrcas_set)
-                continue
-            else:
-                for g in mrcas:
-                    print(t, type_, g, is_root(mrcas[g]), mrcas[g].confidence)
+            result = like_monophyletic(terminals)
+            for group in result:
+                if result[group]:
+                    results.append([t, type_,  mrcas[group].confidence.value])
+                    ok = ' OK'
+            Phylo.draw(tree, do_show=False, title=(type_+ok,),
+                       savefig=(t.with_suffix('.pdf'),))
+    return results
 
 
 def parse_args():
@@ -108,11 +128,19 @@ def main():
     arg = parse_args()
     arg.folder = Path(arg.folder)
     trees = list(arg.folder.glob('*'))
+    trees = [i.absolute() for i in trees]
     info = parse_info(arg)
     types = [arg.folder/i for i in info.keys()]
-    # for i in types:
-    #     i.mkdir()
-    divide_trees(trees, info, types)
+    types_dict = dict(zip(info.keys(), types))
+    for i in types:
+        i.mkdir()
+    result = divide_trees(trees, info, types)
+    result_csv = arg.folder / 'result.csv'
+    with open(result_csv, 'w') as out:
+        out.write('Tree,Type,Confidence\n')
+        for i in result:
+            out.write('{},{},{}\n'.format(*i))
+            Path(types_dict[i[1]]/i[0]).write_bytes(i[0].read_bytes())
 
 
 if __name__ == '__main__':
