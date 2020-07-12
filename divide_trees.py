@@ -86,7 +86,6 @@ def divide_trees(trees, info, types):
     for t in trees:
         tree = Phylo.read(t, 'newick').as_phyloxml()
         root = tree.root
-        print()
         for type_ in info:
             ok = ''
             color = ['orange', 'green', 'blue', 'red']
@@ -140,7 +139,7 @@ def main():
         out.write('Tree,Type,Confidence\n')
         for i in result:
             out.write('{},{},{}\n'.format(*i))
-            Path(types_dict[i[1]]/i[0]).write_bytes(i[0].read_bytes())
+            Path(types_dict[i[1]]/i[0].name).write_text(i[0].read_text())
 
 
 if __name__ == '__main__':
