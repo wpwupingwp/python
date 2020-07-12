@@ -49,6 +49,15 @@ def divide_trees(trees, info, types):
         else:
             return 'not_root'
 
+    def get_clade(names):
+        clades = {}
+        for i in names:
+            clade = list(tree.find_clades(i))
+            if clade:
+                clades.add(clade[0])
+        # mrca = tree.common_ancestor(*clades)
+        return clades
+
     for t in trees:
         tree = Phylo.read(t, 'newick').as_phyloxml()
         root = tree.root
@@ -58,30 +67,19 @@ def divide_trees(trees, info, types):
             color = ['orange', 'green', 'blue', 'red']
             mrcas = dict()
             for group in info[type_]:
-                taxons = []
-                for i in info[type_][group]:
-                    clade = list(tree.find_clades(i))
-                    if len(clade) == 0:
-                        # print(i, 'not found')
-                        pass
-                    else:
-                        taxons.append(clade[0])
-                        clade[0].color = color[-1]
-                try:
-                    purple = [i for i in tree.get_nonterminals() if
-                              i.color=='#992299']
-                    print(purple)
-                    mrca = tree.common_ancestor(*taxons)
-                    mrca.color = '#992299'
+                clades, mrca = get_mrca(info[type_][group])
+                for clade in clades:
+                    clade.color = color[-1]
+                color.pop()
+                mrca.color = 'black'
+                purple = [i for i in tree.get_nonterminals() if
+                          i.color=='black']
+                print(purple)
                     # print(group, mrca!=tree.root, tree.get_path(mrca))
                 # Bio.Phylo seems raise TypeError when mrca not found
-                except Exception:
-                    mrca = None
-                    print(f'MRCA of {group} in {type_} not found in {t}.')
-                    raise
+                    # print(f'MRCA of {group} in {type_} not found in {t}.')
                 mrcas[group] = mrca
-                color.pop()
-            Phylo.draw(tree)
+            Phylo.draw(tree, title=(type_,))
             mrcas_set = set(mrcas.values())
             if None in mrcas_set or len(mrcas_set) == 1:
                 print('####', mrcas_set)
