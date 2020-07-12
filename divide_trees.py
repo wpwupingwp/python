@@ -55,7 +55,11 @@ def divide_trees(trees, info, types):
             clade = list(tree.find_clades(i))
             if clade:
                 clades.add(clade[0])
-        mrca = tree.common_ancestor(*clades)
+        try:
+            mrca = tree.common_ancestor(*clades)
+            # biopython raise TypeError if not found
+        except Exception:
+            mrca = tree.root
         return clades, mrca
 
     def get_parent(root, clade):
@@ -84,7 +88,10 @@ def divide_trees(trees, info, types):
 
     results = []
     for t in trees:
-        tree = Phylo.read(t, 'newick').as_phyloxml()
+        try:
+            tree = Phylo.read(t, 'newick').as_phyloxml()
+        except Exception:
+            print('Ignore', t)
         root = tree.root
         for type_ in info:
             ok = ''
@@ -101,10 +108,15 @@ def divide_trees(trees, info, types):
             result = like_monophyletic(terminals)
             for group in result:
                 if result[group]:
-                    results.append([t, type_,  mrcas[group].confidence.value])
+                    confidence = mrcas[group].confidence
+                    if confidence is None:
+                        confidence = 'undefined'
+                    else:
+                        confidence = confidence.value
+                    results.append([t, type_, confidence])
                     ok = ' OK'
             Phylo.draw(tree, do_show=False, title=(type_+ok,),
-                       savefig=(t.with_suffix('.pdf'),))
+                       savefig=(t.with_suffix(f'.{type_}.pdf'),))
     return results
 
 
@@ -125,6 +137,7 @@ def main():
     Divide trees according to type of topology.
     """
     arg = parse_args()
+    print('Start.')
     arg.folder = Path(arg.folder)
     trees = list(arg.folder.glob('*'))
     trees = [i.absolute() for i in trees]
@@ -140,6 +153,7 @@ def main():
         for i in result:
             out.write('{},{},{}\n'.format(*i))
             Path(types_dict[i[1]]/i[0].name).write_text(i[0].read_text())
+    print('Done.')
 
 
 if __name__ == '__main__':
