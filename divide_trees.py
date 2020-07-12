@@ -43,35 +43,52 @@ def divide_trees(trees, info, types):
         info(dict): info of types, groups and taxons
         types(list): list of Path() to output
     """
+    def is_root(clade):
+        if clade == root:
+            return 'is_root'
+        else:
+            return 'not_root'
+
     for t in trees:
-        tree = Phylo.read(t, 'newick')
+        tree = Phylo.read(t, 'newick').as_phyloxml()
+        root = tree.root
         print()
+        print('tree, type, group, confidence')
         for type_ in info:
+            color = ['orange', 'green', 'blue', 'red']
             mrcas = dict()
             for group in info[type_]:
                 taxons = []
                 for i in info[type_][group]:
                     clade = list(tree.find_clades(i))
                     if len(clade) == 0:
+                        # print(i, 'not found')
                         pass
-                        # print('\t', i, 'not found')
                     else:
                         taxons.append(clade[0])
+                        clade[0].color = color[-1]
                 try:
+                    purple = [i for i in tree.get_nonterminals() if
+                              i.color=='#992299']
+                    print(purple)
                     mrca = tree.common_ancestor(*taxons)
-                    print(group, mrca!=tree.root, tree.get_path(mrca))
+                    mrca.color = '#992299'
+                    # print(group, mrca!=tree.root, tree.get_path(mrca))
                 # Bio.Phylo seems raise TypeError when mrca not found
                 except Exception:
                     mrca = None
                     print(f'MRCA of {group} in {type_} not found in {t}.')
                     raise
                 mrcas[group] = mrca
+                color.pop()
+            Phylo.draw(tree)
             mrcas_set = set(mrcas.values())
             if None in mrcas_set or len(mrcas_set) == 1:
+                print('####', mrcas_set)
                 continue
             else:
                 for g in mrcas:
-                    print(t, type_, g, mrcas[g]!=tree.root, mrcas[g].confidence)
+                    print(t, type_, g, is_root(mrcas[g]), mrcas[g].confidence)
 
 
 def parse_args():
@@ -92,14 +109,11 @@ def main():
     """
     arg = parse_args()
     arg.folder = Path(arg.folder)
-    trees = list(arg.folder.glob('*.tre'))
+    trees = list(arg.folder.glob('*'))
     info = parse_info(arg)
     types = [arg.folder/i for i in info.keys()]
-    for i in types:
-        try:
-            i.mkdir()
-        except FileExistsError:
-            pass
+    # for i in types:
+    #     i.mkdir()
     divide_trees(trees, info, types)
 
 
