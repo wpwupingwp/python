@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+from collections import defaultdict
 
 from Bio import Phylo
 
@@ -65,8 +66,29 @@ def divide_trees(trees, info, types):
     def get_parent(root, clade):
         if clade == root:
             return root
+        # get path return terminal if path is root-terminal
         lineage = root.get_path(clade)
-        return lineage[-2]
+        if len(lineage) >= 2:
+            return lineage[-2]
+        else:
+            return root
+
+    def get_non_bifurcating(root, clades):
+        # MRCA's terminals
+        non_bifurcating = set()
+        parent_terminal = defaultdict(list)
+        for i in clades:
+            parent = get_parent(root, i)
+            parent_terminal[parent].append(i)
+            # if not parent.is_bifurcating() or parent == root:
+            if not parent.is_bifurcating():
+                non_bifurcating.add(i)
+
+        for key, values in parent_terminal.items():
+            if len(values) > 2:
+                print(key, values)
+                non_bifurcating.update(values)
+        return non_bifurcating
 
     def like_monophyletic(lists):
         # biopython's same-name function is too strict
@@ -93,6 +115,10 @@ def divide_trees(trees, info, types):
         except Exception:
             print('Ignore', t)
         root = tree.root
+        non_bifurcating = get_non_bifurcating(root, tree.get_terminals())
+        print(non_bifurcating)
+        for i in non_bifurcating:
+            i.color='green'
         for type_ in info:
             ok = ''
             color = ['orange', 'green', 'blue', 'red']
@@ -115,7 +141,10 @@ def divide_trees(trees, info, types):
                         confidence = confidence.value
                     results.append([t, type_, confidence])
                     ok = ' OK'
-            Phylo.draw(tree, do_show=False, title=(type_+ok,),
+            # Phylo.draw(tree, do_show=False, title=(type_+ok,),
+            for i in non_bifurcating:
+                i.color='green'
+            Phylo.draw(tree, do_show=True, title=(type_+ok,),
                        savefig=(t.with_suffix(f'.{type_}.pdf'),))
     return results
 
