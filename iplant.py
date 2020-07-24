@@ -23,10 +23,11 @@ def request(name):
     if search.group() is not None:
         title = search.groupdict()['name'].strip()
     if title == '植物智':
-        print(name, 'not found')
+        print('!', name, 'NOT FOUND')
         return name, ''
     chinese, *latin_list = title.split(' ')
     latin = ' '.join(latin_list)
+    print(chinese, latin)
     return chinese, latin
 
 
@@ -37,11 +38,9 @@ def main():
     for line in raw:
         name = line.strip()
         chinese, latin = request(name)
-        if latin != '':
-            print(chinese, '#', latin)
-            out.write(f'{chinese}#{latin}\n')
-        else:
+        if latin == '':
             miss.write(f'{chinese}\n')
+        out.write(f'{chinese}#{latin}\n')
 
 
 if __name__ == '__main__':
