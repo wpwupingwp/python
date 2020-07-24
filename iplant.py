@@ -21,11 +21,11 @@ def request(name):
     text = raw.decode('utf-8')
     search = re.search(pattern, text)
     if search.group() is not None:
-        name = search.groupdict()['name'].strip()
-    if name == '植物智':
+        title = search.groupdict()['name'].strip()
+    if title == '植物智':
         print(name, 'not found')
         return name, ''
-    chinese, *latin_list = name.split(' ')
+    chinese, *latin_list = title.split(' ')
     latin = ' '.join(latin_list)
     return chinese, latin
 
