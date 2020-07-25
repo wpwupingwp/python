@@ -13,6 +13,7 @@ Format of info file:
 Type1
 A:,taxon1,taxon2,taxon3
 B:,taxon4,taxon5,taxon6
+C:,taxon9,taxon3,taxon7
 Type2
 A:,taxon7,taxon8,taxon9
 B:,taxon4,taxon5,taxon6
@@ -37,6 +38,75 @@ B:,taxon8,taxon9,taxon10
     return info
 
 
+def is_root(tree, clade):
+    if clade == tree.root:
+        return 'is_root'
+    else:
+        return 'not_root'
+
+
+def get_mrca(tree, names):
+    clades = set()
+    for i in names:
+        clade = list(tree.find_clades(i))
+        if clade:
+            clades.add(clade[0])
+    try:
+        mrca = tree.common_ancestor(*clades)
+        # biopython raise TypeError if not found
+    except Exception:
+        mrca = tree.root
+    return clades, mrca
+
+
+def get_parent(tree, clade):
+    if clade == tree.root:
+        return clade
+    # get path return terminal if path is root-terminal
+    lineage = tree.root.get_path(clade)
+    if len(lineage) >= 2:
+        return lineage[-2]
+    else:
+        return tree.root
+
+
+def get_non_bifurcating(tree, clades):
+    # MRCA's terminals
+    non_bifurcating = set()
+    parent_terminal = defaultdict(list)
+    for i in clades:
+        parent = get_parent(tree.root, i)
+        parent_terminal[parent].append(i)
+        # if not parent.is_bifurcating() or parent == root:
+        if not parent.is_bifurcating():
+            non_bifurcating.add(i)
+
+    for key, values in parent_terminal.items():
+        if len(values) > 2:
+            print(key, values)
+            non_bifurcating.update(values)
+    return non_bifurcating
+
+
+def like_monophyletic(lists):
+    # biopython's same-name function is too strict
+    result = {}
+    for list_ in lists:
+        copy = lists[::]
+        copy.remove(list_)
+        children = list_[1].get_terminals()
+        others = []
+        for c in copy:
+            group, mrca, clades = c
+            # only consider given group's terminals
+            others.extend(clades)
+        if len(set(children) & set(others)) == 0:
+            result[list_[0]] = True
+        else:
+            result[list_[0]] = False
+    return result
+
+
 def divide_trees(trees, info, types):
     """
     Args:
@@ -44,70 +114,6 @@ def divide_trees(trees, info, types):
         info(dict): info of types, groups and taxons
         types(list): list of Path() to output
     """
-    def is_root(clade):
-        if clade == root:
-            return 'is_root'
-        else:
-            return 'not_root'
-
-    def get_mrca(names):
-        clades = set()
-        for i in names:
-            clade = list(tree.find_clades(i))
-            if clade:
-                clades.add(clade[0])
-        try:
-            mrca = tree.common_ancestor(*clades)
-            # biopython raise TypeError if not found
-        except Exception:
-            mrca = tree.root
-        return clades, mrca
-
-    def get_parent(root, clade):
-        if clade == root:
-            return root
-        # get path return terminal if path is root-terminal
-        lineage = root.get_path(clade)
-        if len(lineage) >= 2:
-            return lineage[-2]
-        else:
-            return root
-
-    def get_non_bifurcating(root, clades):
-        # MRCA's terminals
-        non_bifurcating = set()
-        parent_terminal = defaultdict(list)
-        for i in clades:
-            parent = get_parent(root, i)
-            parent_terminal[parent].append(i)
-            # if not parent.is_bifurcating() or parent == root:
-            if not parent.is_bifurcating():
-                non_bifurcating.add(i)
-
-        for key, values in parent_terminal.items():
-            if len(values) > 2:
-                print(key, values)
-                non_bifurcating.update(values)
-        return non_bifurcating
-
-    def like_monophyletic(lists):
-        # biopython's same-name function is too strict
-        result = {}
-        for list_ in lists:
-            copy = lists[::]
-            copy.remove(list_)
-            children = list_[1].get_terminals()
-            others = []
-            for c in copy:
-                group, mrca, clades = c
-                # only consider given group's terminals
-                others.extend(clades)
-            if len(set(children) & set(others)) == 0:
-                result[list_[0]] = True
-            else:
-                result[list_[0]] = False
-        return result
-
     results = []
     for t in trees:
         try:
@@ -118,7 +124,7 @@ def divide_trees(trees, info, types):
         non_bifurcating = get_non_bifurcating(root, tree.get_terminals())
         print(non_bifurcating)
         for i in non_bifurcating:
-            i.color='green'
+            i.color = 'green'
         for type_ in info:
             ok = ''
             color = ['orange', 'green', 'blue', 'red']
@@ -143,7 +149,7 @@ def divide_trees(trees, info, types):
                     ok = ' OK'
             # Phylo.draw(tree, do_show=False, title=(type_+ok,),
             for i in non_bifurcating:
-                i.color='green'
+                i.color = 'green'
             Phylo.draw(tree, do_show=True, title=(type_+ok,),
                        savefig=(t.with_suffix(f'.{type_}.pdf'),))
     return results
@@ -157,7 +163,6 @@ def parse_args():
                      help='info of taxons to be clusterd')
     arg.add_argument('-folder', required=True, help='folder contains trees')
     arg.print_usage()
-    print(parse_info.__doc__)
     return arg.parse_args()
 
 
@@ -171,9 +176,13 @@ def main():
     trees = list(arg.folder.glob('*'))
     trees = [i.absolute() for i in trees]
     info = parse_info(arg)
+    print(info)
+    exit()
     types = [arg.folder/i for i in info.keys()]
     types_dict = dict(zip(info.keys(), types))
     for i in types:
+        # to be continue
+        continue
         i.mkdir()
     result = divide_trees(trees, info, types)
     result_csv = arg.folder / 'result.csv'
