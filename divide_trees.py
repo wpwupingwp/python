@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from collections import defaultdict
 
+from matplotlib import pyplot as plt
 from Bio import Phylo
 
 
@@ -75,7 +76,7 @@ def get_non_bifurcating(tree, clades):
     non_bifurcating = set()
     parent_terminal = defaultdict(list)
     for i in clades:
-        parent = get_parent(tree.root, i)
+        parent = get_parent(tree, i)
         parent_terminal[parent].append(i)
         # if not parent.is_bifurcating() or parent == root:
         if not parent.is_bifurcating():
@@ -115,14 +116,15 @@ def divide_trees(trees, info, types):
         types(list): list of Path() to output
     """
     results = []
+    success = 0
+    fail = 0
     for t in trees:
         try:
             tree = Phylo.read(t, 'newick').as_phyloxml()
         except Exception:
             print('Ignore', t)
-        root = tree.root
-        non_bifurcating = get_non_bifurcating(root, tree.get_terminals())
-        print(non_bifurcating)
+        non_bifurcating = get_non_bifurcating(tree, tree.get_terminals())
+        # print(non_bifurcating)
         for i in non_bifurcating:
             i.color = 'green'
         for type_ in info:
@@ -131,7 +133,7 @@ def divide_trees(trees, info, types):
             terminals = []
             mrcas = {}
             for group in info[type_]:
-                clades, mrca = get_mrca(info[type_][group])
+                clades, mrca = get_mrca(tree, info[type_][group])
                 for clade in clades:
                     clade.color = color[-1]
                 color.pop()
@@ -150,8 +152,12 @@ def divide_trees(trees, info, types):
             # Phylo.draw(tree, do_show=False, title=(type_+ok,),
             for i in non_bifurcating:
                 i.color = 'green'
-            Phylo.draw(tree, do_show=True, title=(type_+ok,),
+            Phylo.draw(tree, do_show=False, title=(type_+ok,),
                        savefig=(t.with_suffix(f'.{type_}.pdf'),))
+            # release memory, or matplotlib will break down
+            plt.close('all')
+    print('success', success)
+    print('fail', fail)
     return results
 
 
@@ -176,13 +182,9 @@ def main():
     trees = list(arg.folder.glob('*'))
     trees = [i.absolute() for i in trees]
     info = parse_info(arg)
-    print(info)
-    exit()
     types = [arg.folder/i for i in info.keys()]
     types_dict = dict(zip(info.keys(), types))
     for i in types:
-        # to be continue
-        continue
         i.mkdir()
     result = divide_trees(trees, info, types)
     result_csv = arg.folder / 'result.csv'
