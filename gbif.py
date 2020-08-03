@@ -13,12 +13,12 @@ def request(name, limit=3):
     fullurl = f'{url}?name={name}&limit={limit}'
     request = urlopen(fullurl)
     if request.status != 200:
-        return name, ''
+        return '', '', ''
     raw = request.read()
     # text = raw.decode('utf-8')
-    json_dict = json.load(raw)
+    json_dict = json.loads(raw)
     if len(json_dict['results']) == 0:
-        return name, ''
+        return '', '', ''
     family = ''
     gbif_taxon_id = ''
     dan_or_shuang = ''
@@ -32,7 +32,7 @@ def request(name, limit=3):
         dan_or_shuang = result['class']
         break
     print(name, family, gbif_taxon_id, dan_or_shuang)
-    return name, family, gbif_taxon_id, dan_or_shuang
+    return family, gbif_taxon_id, dan_or_shuang
 
 
 def main():
@@ -41,10 +41,11 @@ def main():
     miss = open(argv[1]+'-not_found.txt', 'w', encoding='utf-8')
     for line in raw:
         name = line.strip()
-        chinese, latin = request(name)
-        if latin == '':
-            miss.write(f'{chinese}\n')
-        out.write(f'{chinese}#{latin}\n')
+        family, gbif_taxon_id, dan_or_shuang = request(name)
+        if family == '':
+            miss.write(f'{name}\n')
+        out.write(','.join([name, family, gbif_taxon_id, dan_or_shuang]))
+        out.write('\n')
 
 
 if __name__ == '__main__':
