@@ -22,8 +22,8 @@ async def main():
     print('python3 merge_folder.py source dest')
     source_dir = Path(argv[1]).absolute()
     dest_dir = Path(argv[2]).absolute()
-    sources = set(i.name for i in source_dir.glob('gene*'))
-    dests = set(i.name for i in dest_dir.glob('gene*'))
+    sources = set(i.name for i in source_dir.glob('*'))
+    dests = set(i.name for i in dest_dir.glob('*'))
     to_merge = dests.intersection(sources)
     to_move = dests.difference(sources)
     for i in to_merge:
