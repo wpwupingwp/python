@@ -18,7 +18,6 @@ def print_time(function):
     return wrapper
 
 
-@print_time
 def shorten(fasta, max_len):
     output = open(fasta+'.short', 'w')
     for record in SeqIO.parse(fasta, 'fasta'):
