@@ -21,10 +21,12 @@ def print_time(function):
 def shorten(fasta, max_len):
     output = open(fasta+'.short', 'w')
     for record in SeqIO.parse(fasta, 'fasta'):
+        print(record.id, len(record), end=' ')
         if len(record) < max_len:
             SeqIO.write(record, output, 'fasta')
+            print()
         else:
-            print(record.id, len(record))
+            print('Removed.')
 
 
 def parse_args():
