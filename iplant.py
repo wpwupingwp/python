@@ -56,6 +56,7 @@ def parse(text: str):
 
 
 def old():
+    # deprecated
     name = ''
     text = ''
     title = ''
