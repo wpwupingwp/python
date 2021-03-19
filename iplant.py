@@ -51,7 +51,12 @@ def write_cache(cache: dict):
 def request(name: str) ->str:
     sleep(sleep_time)
     fullurl = url + quote(name)
-    request = urlopen(fullurl)
+    try:
+        request = urlopen(fullurl)
+    except Exception:
+        log.error('Failed to open website.')
+        log.info(f'Stop at {name}')
+        raise SystemExit(-1)
     if request.status != 200:
         return ''
     else:
