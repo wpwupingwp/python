@@ -21,7 +21,7 @@ log = logging.getLogger('iplant')
 
 url = r'http://www.iplant.cn/info/'
 # pattern = re.compile(r'<title>(?P<name>.*)</title>', re.DOTALL)
-pattern = re.compile(r'[A-Za-z ]+')
+pattern = re.compile(r'[A-Za-z \.]+')
 sleep_time = 0.5
 cache_file = Path().cwd() / 'iplant_cache.json'
 
