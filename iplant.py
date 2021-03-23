@@ -76,7 +76,6 @@ def get_text(element: 'Element') ->str:
 
 
 def parse(text: str, raw_name: str):
-    #a = html.document_fromstring(raw)
     a = etree.HTML(text)
     cname_path = a.xpath('//*[@class="infocname"]')
     cname = get_text(cname_path)
@@ -116,23 +115,6 @@ def main():
         out.write(f'{raw_name},{name},{cname},{change_name}\n')
     write_cache(cache)
     log.info('Done.')
-
-
-def old():
-    # deprecated
-    name = ''
-    text = ''
-    title = ''
-    search = re.search(pattern, text)
-    if search.group() is not None:
-        title = search.groupdict()['name'].strip()
-    if title == '植物智':
-        print('!', name, 'NOT FOUND')
-        return name, ''
-    chinese, *latin_list = title.split(' ')
-    latin = ' '.join(latin_list)
-    print(chinese, latin)
-    return chinese, latin
 
 
 if __name__ == '__main__':
