@@ -20,8 +20,8 @@ logging.basicConfig(format=FMT, datefmt=DATEFMT, level=logging.INFO)
 log = logging.getLogger('iplant')
 
 url = r'http://www.iplant.cn/info/'
-# pattern = re.compile(r'<title>(?P<name>.*)</title>', re.DOTALL)
-pattern = re.compile(r'[A-Za-z \.]+')
+#pattern = re.compile(r'[A-Za-z \.]+')
+pattern = re.compile(r'(?![\u4e00-\u9fa5]+)\s(\S.+)')
 sleep_time = 0.5
 cache_file = Path().cwd() / 'iplant_cache.json'
 
@@ -87,7 +87,7 @@ def parse(text: str, raw_name: str):
     if _ is None:
         change_name = ''
     else:
-        change_name = _.group()
+        change_name = _.group(1)
     log.info(f'{raw_name}: {name}, {cname}, {change_name}')
     return cname, name, change_name
 
