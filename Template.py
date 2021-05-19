@@ -3,24 +3,22 @@
 import argparse
 import logging
 from pathlib import Path
-from os import devnull
+from subprocess import DEVNULL, run
 from tempfile import TemporaryDirectory
 
 # Temoprary folder
 TMP = TemporaryDirectory()
-NULL = open(devnull, 'w')
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
 DATEFMT = '%H:%M:%S'
+formatter = logging.Formatter(fmt=FMT, datefmt=DATEFMT)
+default_level = logging.INFO
 TEMP_LOG = 'Temp.log'
-logging.basicConfig(format=FMT, datefmt=DATEFMT, level=logging.INFO,
-                    handlers=[logging.StreamHandler(),
-                              logging.FileHandler(TEMP_LOG)])
-try:
-    import coloredlogs
-    coloredlogs.install(level=logging.INFO, fmt=FMT, datefmt=DATEFMT)
-except ImportError:
-    pass
+import coloredlogs
+coloredlogs.install(level=default_level, fmt=FMT, datefmt=DATEFMT)
+log_file = logging.FileHandler(TEMP_LOG)
+log_file.setFormatter(formatter)
+log_file.setLevel(default_level)
 log = logging.getLogger(__name__)
 
 
