@@ -67,11 +67,11 @@ def request(name: str) ->str:
 
 def get_text(element: 'Element') ->str:
     if len(element) == 0:
-        return ''
+        return 'NOT_FOUND'
     else:
         text = element[0].text
         if text is None:
-            text = ''
+            text = 'NOT_FOUND'
         return text
 
 
@@ -85,10 +85,10 @@ def parse(text: str, raw_name: str):
     change_name_raw = get_text(change_path)
     _ = re.search(pattern, change_name_raw)
     if _ is None:
-        change_name = ''
+        change_name = 'NOT_FOUND'
     else:
         change_name = _.group(1)
-    print('change',change_name, change_name_raw)
+        print('Change', change_name, change_name_raw)
     log.info(f'{raw_name}: {name}, {cname}, {change_name}')
     return cname, name, change_name
 
