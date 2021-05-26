@@ -88,7 +88,7 @@ def parse(text: str, raw_name: str):
         change_name = 'NOT_FOUND'
     else:
         change_name = _.group(1)
-        print('Change', change_name, change_name_raw)
+        log.warning(f'Changed: {name}, {change_name}, {change_name_raw}')
     log.info(f'{raw_name}: {name}, {cname}, {change_name}')
     return cname, name, change_name
 
