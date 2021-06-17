@@ -84,6 +84,7 @@ def main():
 
     with open(output, 'wb') as out:
         writer.write(out)
+    watermark.unlink()
     print('Done.')
 
 if __name__ == '__main__':
