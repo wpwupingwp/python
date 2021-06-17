@@ -6,6 +6,8 @@ import json
 import csv
 
 import requests
+import certifi
+print('Note: certifi should be the newest version')
 
 
 
