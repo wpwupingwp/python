@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 TMP = TemporaryDirectory()
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
-DATEFMT = '%H:%M:%S'
+DATEFMT = '%Y-%m-%d %H:%M:%S'
 formatter = logging.Formatter(fmt=FMT, datefmt=DATEFMT)
 default_level = logging.INFO
 TEMP_LOG = 'Temp.log'
