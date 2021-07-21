@@ -24,7 +24,6 @@ def main():
     arg.add_argument('-f', '--files')
     arg.add_argument('-c', '--cpu', type=int, default=cpu_count()-1)
     arg = arg.parse_args()
-    print(arg)
 
     files = glob(arg.files)
     tasks = [(arg.command, i) for i in files]
