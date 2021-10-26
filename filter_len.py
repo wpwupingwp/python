@@ -11,8 +11,10 @@ print('Example: python filter_len.py rbcL.fasta min-100 101-1000 1001-10000 '
       '10001-200000 200000-max')
 
 fasta = Path(argv[1]).absolute()
+if len(argv) < 2:
+    raise ValueError('Bad input')
 length_range_raw = argv[2:]
-range_file = dict()
+range_file = list()
 for i in length_range_raw:
     r = i.split('-')
     if len(r) != 2:
@@ -24,13 +26,14 @@ for i in length_range_raw:
     r_ = range(int(r[0]), int(r[1]))
     filename = fasta.with_suffix(f'.{i}.fasta')
     handle = open(filename, 'a')
-    range_file[r_] = handle
+    range_file.append((r_, handle))
+other = open(fasta.with_suffix(('.other.fasta')), 'a')
 for record in SeqIO.parse(fasta, 'fasta'):
     length = len(record)
     for range_, handle in range_file:
         if length in range_:
             SeqIO.write(record, handle, 'fasta')
             break
-    raise ValueError(f'{length} cannot be process')
+    SeqIO.write(record, other, 'fasta')
 print('Done')
 
