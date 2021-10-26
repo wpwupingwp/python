@@ -32,4 +32,5 @@ for record in SeqIO.parse(fasta, 'fasta'):
             SeqIO.write(record, handle, 'fasta')
             break
     raise ValueError(f'{length} cannot be process')
+print('Done')
 
