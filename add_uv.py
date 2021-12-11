@@ -875,7 +875,7 @@ if __name__ == '__main__':
     ua_list = get_ua()
     number = 100
     results = []
-    with ProcessPoolExecutor(max_workers=10) as pool:
+    with ProcessPoolExecutor(max_workers=5) as pool:
         for i in range(number):
             results.append(pool.submit(open_url, url, random.choice(ua_list)))
     for i, r in enumerate(as_completed(results)):
