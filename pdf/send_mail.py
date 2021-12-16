@@ -20,8 +20,9 @@ def send(to='', attachment=None, key=''):
     msg.set_content(content)
     if attachment is not None:
         with open(attachment, 'rb') as _:
-            attachment = _.read()
-        msg.add_attachment(attachment, maintype='application', subtype='pdf')
+            attachment_bin = _.read()
+            # attachment: Path
+        msg.add_attachment(attachment_bin, maintype='application', subtype='pdf', filename=attachment.name)
 
     smtp = smtplib.SMTP(host=server, port=port)
     # smtp.connect()
@@ -29,3 +30,4 @@ def send(to='', attachment=None, key=''):
     smtp.login(username, password)
     smtp.send_message(msg)
     smtp.quit()
+    print('Email sent.')

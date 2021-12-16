@@ -60,9 +60,9 @@ def generate_watermark(text: str) -> Path:
 
 
 def add_mark(pdf: Path, mark: 'Path or str'):
-    print('Usage: python3 add_watermark.py original.pdf watermark.pdf')
-    print('Or:')
-    print('Usage: python3 add_watermark.py original.pdf watermark_text')
+    # print('Usage: python3 add_watermark.py original.pdf watermark.pdf')
+    # print('Or:')
+    # print('Usage: python3 add_watermark.py original.pdf watermark_text')
     original = Path(pdf)
     output = original.absolute().parent / ('new-'+original.name)
     watermark = Path(mark)
