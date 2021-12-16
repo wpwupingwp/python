@@ -27,5 +27,5 @@ def send(to='', attachment=None, key=''):
     # smtp.connect()
     smtp.starttls()
     smtp.login(username, password)
-    smtp.send(msg)
+    smtp.send_message(msg)
     smtp.quit()
