@@ -8,8 +8,9 @@ from send_mail import send
 
 
 pdf = Path(argv[1]).absolute()
-mark = Path(argv[2]).absolute()
-email = argv[3]
+# email address as mark
+email = argv[2]
+key = argv[3]
 
-marked_pdf = add_mark(pdf, mark)
-send(email, marked_pdf)
+marked_pdf = add_mark(pdf, email)
+send(email, marked_pdf, key)

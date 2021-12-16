@@ -59,7 +59,7 @@ def generate_watermark(text: str) -> Path:
     return wm_file
 
 
-def add_mark(pdf: Path, mark: 'Path or str']):
+def add_mark(pdf: Path, mark: 'Path or str'):
     print('Usage: python3 add_watermark.py original.pdf watermark.pdf')
     print('Or:')
     print('Usage: python3 add_watermark.py original.pdf watermark_text')

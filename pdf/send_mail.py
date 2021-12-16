@@ -4,8 +4,8 @@ import smtplib
 from email.message import EmailMessage
 
 
-def send(to='', attachment=None):
-    with open('email.key', 'r') as key:
+def send(to='', attachment=None, key=''):
+    with open(key, 'r') as key:
         server = key.readline.strip()
         port = key.readline.strip()
         username = key.readline.strip()
