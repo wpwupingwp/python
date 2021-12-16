@@ -59,17 +59,17 @@ def generate_watermark(text: str) -> Path:
     return wm_file
 
 
-def main():
-    print('Usage: python3 pdf_add_watermark.py original.pdf watermark.pdf')
+def add_mark(pdf: Path, mark: 'Path or str']):
+    print('Usage: python3 add_watermark.py original.pdf watermark.pdf')
     print('Or:')
-    print('Usage: python3 pdf_add_watermark.py original.pdf watermark_text')
-    original = Path(argv[1])
+    print('Usage: python3 add_watermark.py original.pdf watermark_text')
+    original = Path(pdf)
     output = original.absolute().parent / ('new-'+original.name)
-    watermark = Path(argv[2])
-    if watermark.exists():
+    watermark = Path(mark)
+    if isinstance(mark, Path):
         pass
     else:
-        watermark = generate_watermark(argv[2])
+        watermark = generate_watermark(mark)
 
     wm_obj = PdfFileReader(str(watermark))
     wm_page = wm_obj.getPage(0)
@@ -86,6 +86,7 @@ def main():
         writer.write(out)
     watermark.unlink()
     print('Done.')
+    return output
 
 if __name__ == '__main__':
-    main()
+    add_mark(argv[1], argv[2])
