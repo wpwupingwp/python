@@ -54,6 +54,7 @@ def ui():
     root = tk.Tk()
     root.attributes('-topmost', 'true')
     root.title('arp_hap_to_nex')
+    root.geometry('500x200')
     root_frame = ttk.Frame(root)
     root_frame.place(relx=0.5, rely=0.5, anchor='center')
     row = 0
