@@ -85,7 +85,7 @@ def ui():
     root.mainloop()
 
 
-def write_hap(hap_file: Path, nex_file: Path) -> (Path, list):
+def write_hap(hap_file: Path, nex_file: Path) -> list:
     samples = []
     with open(hap_file, 'r') as hap, open(nex_file, 'w') as nex:
         ntax = 0
@@ -110,7 +110,7 @@ Matrix
 END;
 '''
         nex.write(data_tail)
-    return nex_file, samples
+    return samples
 
 
 def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
@@ -163,7 +163,8 @@ def combine(arp, hap, out):
     arp = Path(arp)
     hap = Path(hap)
     out = Path(out)
-    write_hap(hap, out)
+    samples = write_hap(hap, out)
+    write_arp(arp, out, samples)
     return
 
 
