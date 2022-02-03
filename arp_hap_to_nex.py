@@ -50,7 +50,7 @@ def ui():
         if not all([arp, hap, out]):
             messagebox.showinfo(message='Input is required!')
         combine(arp, hap, out)
-        messagebox.showinfo('Done.')
+        messagebox.showinfo(message='Done.')
         return
 
     global root
