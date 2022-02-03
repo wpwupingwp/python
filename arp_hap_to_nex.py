@@ -105,10 +105,8 @@ Matrix
         for line in hap:
             samples.append(line.split(' ')[0])
             nex.write(line)
-        data_tail = '''
-;
-END;
-'''
+        data_tail = ''';
+END;'''
         nex.write(data_tail)
     return samples
 
@@ -117,7 +115,7 @@ def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
     labels = 'max tra mul cath dai ade'.split()
     with open(arp_file, 'r') as arp, open(nex_file, 'a') as nex:
         head = '''
-        
+
 Begin Traits;
 Dimensions NTraits=6;
 format labels=yes missing=? separator=Tab;
@@ -152,8 +150,7 @@ Matrix
                         record_dict[label] = r[1]
             content = '\t'.join([str(record_dict[i]) for i in labels])
             nex.write(f'{sample}\t{content}\n')
-        tail = '''
-;
+        tail = ''';
 END; 
 '''
         nex.write(tail)
