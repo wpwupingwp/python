@@ -144,12 +144,13 @@ Matrix
                 record.append(line.strip().split(' '))
         sample_traits = dict()
         for sample in samples:
-            record = dict()
-            for label, record in traits_dict:
+            record_dict = {label: 0 for label in labels}
+            for label, record in traits_dict.items():
                 for r in record:
+                    print(r)
                     if r[0] == sample:
-                        record[label] = r[1]
-            content = '\t'.join([record[i] for i in label])
+                        record_dict[label] = r[1]
+            content = '\t'.join([record_dict[i] for i in label])
             nex.write(f'{sample}\t{content}\n')
         tail = '''
 ;
