@@ -69,12 +69,12 @@ def ui():
         'hap file', hap_entry))
     hap_button.grid(row=row, column=3)
     row += 1
-    wlabel(root_frame, 'Output', row=row)
-    out_entry = fentry(root_frame, row=row, column=1,
+    wlabel(root_frame, 'Output', row=row, column=1)
+    out_entry = fentry(root_frame, row=row, column=2,
                        default=str(Path('.').absolute()))
     o_button = ttk.Button(root_frame, text='Open',
                           command=open_file('output file', out_entry))
-    o_button.grid(row=row, column=2)
+    o_button.grid(row=row, column=3)
     row += 1
     ok = ttk.Button(root_frame, text='Enter', command=submit)
     ok.grid(row=row, column=0, columnspan=3, sticky='EW', padx=50, pady=10)
