@@ -150,7 +150,7 @@ Matrix
                     print(r)
                     if r[0] == sample:
                         record_dict[label] = r[1]
-            content = '\t'.join([record_dict[i] for i in label])
+            content = '\t'.join([str(record_dict[i]) for i in labels])
             nex.write(f'{sample}\t{content}\n')
         tail = '''
 ;
