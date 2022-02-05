@@ -81,7 +81,7 @@ def ui():
     o_button.grid(row=row, column=3)
     row += 1
     ok = ttk.Button(root_frame, text='Enter', command=submit)
-    ok.grid(row=row, column=0, columnspan=3, sticky='EW', padx=50, pady=10)
+    ok.grid(row=row, column=0, columnspan=4, sticky='EW', padx=90, pady=20)
     root.mainloop()
 
 
@@ -147,7 +147,6 @@ Matrix
         record_dict = {label: 0 for label in labels}
         for label, record in traits_dict.items():
             for r in record:
-                print(r)
                 if r[0] == sample:
                     record_dict[label] = r[1]
         content = '\t'.join([str(record_dict[i]) for i in labels])
@@ -166,7 +165,6 @@ def combine(arp, hap, out):
     samples = write_hap(hap, out)
     write_arp(arp, out, samples)
     return
-
 
 
 def parse_args():
