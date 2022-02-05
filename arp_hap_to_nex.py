@@ -112,7 +112,7 @@ END;'''
 
 
 def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
-    labels = 'max tra mul cath dai ade'.split()
+    labels = list()
     with open(arp_file, 'r') as arp, open(nex_file, 'a') as nex:
         head = '''
 
@@ -132,6 +132,7 @@ Matrix
                 break
             if line.strip().startswith('SampleName'):
                 name = line.split('"')[1]
+                labels.append(name)
             elif line.strip().startswith('SampleSize'):
                 continue
             elif line.strip().startswith('SampleData'):
