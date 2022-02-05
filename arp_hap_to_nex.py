@@ -93,8 +93,7 @@ def write_hap(hap_file: Path, nex_file: Path) -> list:
             ntax += 1
         nchar = len(line.strip().split(' ')[-1])
         hap.seek(0)
-        data_head = f'''
-#NEXUS
+        data_head = f'''#NEXUS
 Begin Data;
 Dimensions ntax={ntax} nchar={nchar};
 Format datatype=DNA missing=N gap=-;
@@ -113,49 +112,51 @@ END;'''
 
 def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
     labels = list()
-    with open(arp_file, 'r') as arp, open(nex_file, 'a') as nex:
-        head = '''
-
+    arp = open(arp_file, 'r')
+    nex = open(nex_file, 'a')
+    record = []
+    name = ''
+    for line in arp:
+        if line.startswith('[[Samples]]'):
+            break
+    traits_dict = {i: None for i in labels}
+    for line in arp:
+        if len(line.strip()) == 0:
+            break
+        if line.strip().startswith('SampleName'):
+            name = line.split('"')[1]
+            labels.append(name)
+        elif line.strip().startswith('SampleSize'):
+            continue
+        elif line.strip().startswith('SampleData'):
+            record = []
+        elif line.strip().startswith('}'):
+            traits_dict[name] = record
+        else:
+            record.append(line.strip().split(' '))
+    labels_str = '\t'.join(labels)
+    head = f'''
 Begin Traits;
 Dimensions NTraits=6;
 format labels=yes missing=? separator=Tab;
-TraitLabels	max	tra	mul	cath	dai	ade;
+TraitLabels	{labels_str};
 Matrix
 '''
-        nex.write(head)
-        for line in arp:
-            if line.startswith('[[Samples]]'):
-                break
-        traits_dict = {i: None for i in labels}
-        for line in arp:
-            if len(line.strip()) == 0:
-                break
-            if line.strip().startswith('SampleName'):
-                name = line.split('"')[1]
-                labels.append(name)
-            elif line.strip().startswith('SampleSize'):
-                continue
-            elif line.strip().startswith('SampleData'):
-                record = []
-            elif line.strip().startswith('}'):
-                traits_dict[name] = record
-            else:
-                record.append(line.strip().split(' '))
-        sample_traits = dict()
-        for sample in samples:
-            record_dict = {label: 0 for label in labels}
-            for label, record in traits_dict.items():
-                for r in record:
-                    print(r)
-                    if r[0] == sample:
-                        record_dict[label] = r[1]
-            content = '\t'.join([str(record_dict[i]) for i in labels])
-            nex.write(f'{sample}\t{content}\n')
-        tail = ''';
+    nex.write(head)
+    for sample in samples:
+        record_dict = {label: 0 for label in labels}
+        for label, record in traits_dict.items():
+            for r in record:
+                print(r)
+                if r[0] == sample:
+                    record_dict[label] = r[1]
+        content = '\t'.join([str(record_dict[i]) for i in labels])
+        nex.write(f'{sample}\t{content}\n')
+    tail = ''';
 END; 
 '''
-        nex.write(tail)
-        return nex_file
+    nex.write(tail)
+    return nex_file
 
 
 def combine(arp, hap, out):
