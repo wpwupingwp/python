@@ -137,7 +137,7 @@ def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
     labels_str = '\t'.join(labels)
     head = f'''
 Begin Traits;
-Dimensions NTraits=6;
+Dimensions NTraits={len(labels)};
 format labels=yes missing=? separator=Tab;
 TraitLabels	{labels_str};
 Matrix
