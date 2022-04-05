@@ -43,11 +43,13 @@ def main():
     start = timer()
     n = urls_queue.qsize()
     print('n', n)
-    with Pool(n) as p:
-        results2 = [p.apply_async(get, args=(urls_queue.get(), results)) for i in range(n)]
-        for _ in results2:
-            # apply_async use get() to get results
-            print('results2', _.get(timeout=2))
+    p = Pool(n)
+    results2 = [p.apply_async(get, args=(urls_queue.get(), results)) for i in range(n)]
+    p.close()
+    p.join()
+    for _ in results2:
+        # apply_async use get() to get results
+        print('results2', _.get())
     # queue also works
     for _ in range(results.qsize()):
         print(results.get())
