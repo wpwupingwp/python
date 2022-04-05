@@ -36,6 +36,13 @@ async def main():
 
 if __name__ == '__main__':
     # warn deprecated in python37
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(main())
+
+    # error in python3.10
+    # asyncio.run(main())
+
+    # ok in python3.7 and 3.10
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     loop.run_until_complete(main())
-# asyncio.run(main())
