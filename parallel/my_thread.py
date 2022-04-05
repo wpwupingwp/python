@@ -15,6 +15,7 @@ for i in urls:
     urls_queue.put(i)
 print(urls_queue.qsize())
 
+
 def get(url):
     a = urlopen(url)
     b = a.read()
