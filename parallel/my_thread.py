@@ -31,8 +31,8 @@ def main():
         t = Thread(target=get, args=(urls_queue.get(),))
         pool.append(t)
         t.start()
-    # todo
     for t in pool:
+        # sum(join) = max(join)
         t.join()
     for _ in range(results.qsize()):
         print(results.get())
