@@ -31,6 +31,7 @@ def main():
         p = Process(target=get, args=(urls_queue.get(), results))
         pool.append(p)
         p.start()
+    # todo
     for t in pool:
         t.join()
     for _ in range(results.qsize()):
