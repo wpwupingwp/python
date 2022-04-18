@@ -82,6 +82,8 @@ def ui():
     row += 1
     ok = ttk.Button(root_frame, text='Enter', command=submit)
     ok.grid(row=row, column=0, columnspan=4, sticky='EW', padx=90, pady=20)
+    row += 1
+    wlabel(root_frame, 'For ZC', row=row, column=3)
     root.mainloop()
 
 
