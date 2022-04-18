@@ -7,10 +7,10 @@ type_dict = dict()
 input_file = Path(argv[1])
 handle = open(input_file, 'r')
 for line in handle:
-    if line.startswith('#'):
+    if line.startswith('#') or line.startswith('scaffold'):
         continue
     else:
-        line_split = line.split('\t')
+        line_split = line.strip().split('\t')
         feature_type = line_split[2]
         if feature_type == 'scaffold':
             continue
