@@ -2,9 +2,8 @@
 '''
 # # install
 ```bash
-python3 -m pip install nuitka==0.6.19.6
+python3 -m pip install nuitka==0.9.6
 ```
-do not support python3.10 yet
 require c compilers
 
 # build
@@ -16,4 +15,5 @@ from subprocess import run
 from sys import argv
 r = run(f'python37 -m nuitka --standalone --show-progress '
         f'--nofollow-imports --enable-plugin=tk-inter {argv[1]} '
-        f'--onefile --windows-disable-console', shell=True)
+        f'--onefile --windows-disable-console --enable-plugin=numpy',
+        shell=True)
