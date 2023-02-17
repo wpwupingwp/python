@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+from glob import glob
+from sys import argv
+from Bio import SeqIO
+from subprocess import run
+from pathlib import Path
+
+
+def main(nt_file: Path) -> Path:
+    _translate = []
+    for i in SeqIO.parse(nt_file, 'fasta'):
+        i.seq = i.seq.replace('-', '')
+        _translate.append(i.translate(id=i.id, table=11))
+    tmp = nt_file.with_suffix('.tmp')
+    aa = nt_file.with_suffix('.aa.aln')
+    SeqIO.write(_translate, tmp, 'fasta')
+    r = run(f'mafft --auto --reorder {tmp} > {aa}', shell=True)
+    if r.returncode != 0:
+        raise Exception('Alignment failed.')
+    tmp.unlink()
+    return aa
+
+
+if __name__ == '__main__':
+    for i in glob('*.aln'):
+        main(Path(i))
