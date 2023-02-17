@@ -14,3 +14,5 @@ for record in SeqIO.parse(argv[1], 'fasta'):
         with open(name+'.pdb', 'w') as out:
             out.write(r.text)
         print('Got', name)
+    else:
+        print('Fail', name, r.status_code, r.text)
