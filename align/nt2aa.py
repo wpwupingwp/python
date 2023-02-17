@@ -9,7 +9,7 @@ def main(nt_file: Path) -> Path:
     _translate = []
     for i in SeqIO.parse(nt_file, 'fasta'):
         i.seq = i.seq.replace('-', '')
-        _translate.append(i.translate(id=i.id, table=11))
+        _translate.append(i.translate(id=i.id, description='', table=11))
     tmp = nt_file.with_suffix('.tmp')
     aa = nt_file.with_suffix('.aa.aln')
     SeqIO.write(_translate, tmp, 'fasta')
