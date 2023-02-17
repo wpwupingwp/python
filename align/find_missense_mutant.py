@@ -93,8 +93,7 @@ def main():
                 output.write(out_line + '\n')
     for i in out3:
         output2.write('>'+i+'\n')
-        output2.write(''.join(seqs[np.where(name==i)[0][0], :])+'\n')
-    print(out3)
+        output2.write(''.join(seqs[np.where(name==i)[0][0], :]).replace('-', '')+'\n')
     return
 
 
