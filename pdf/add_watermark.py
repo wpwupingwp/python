@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
 from sys import argv
@@ -71,16 +71,16 @@ def add_mark(pdf: Path, mark: 'Path or str'):
     else:
         watermark = generate_watermark(mark)
 
-    wm_obj = PdfFileReader(str(watermark))
-    wm_page = wm_obj.getPage(0)
+    wm_obj = PdfReader(str(watermark))
+    wm_page = wm_obj.pages[0]
 
-    reader = PdfFileReader(str(original))
-    writer = PdfFileWriter()
+    reader = PdfReader(str(original))
+    writer = PdfWriter()
 
-    for index in range(reader.getNumPages()):
-        page = reader.getPage(index)
-        page.mergePage(wm_page)
-        writer.addPage(page)
+    for index in range(len(reader.pages)):
+        page = reader.pages[index]
+        page.merge_page(wm_page)
+        writer.add_page(page)
 
     with open(output, 'wb') as out:
         writer.write(out)
