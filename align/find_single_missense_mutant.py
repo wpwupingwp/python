@@ -56,6 +56,8 @@ def main():
     output2 = open(output_file2, 'w')
     out3 = set()
     name, seqs = fasta_to_array(input_file)
+    if name is None:
+        return -1
     row, col = seqs.shape
     threshold = row // 2
     for a in range(row):
