@@ -2,7 +2,6 @@
 from pathlib import Path
 import shutil
 
-
 pwd = Path().cwd().absolute()
 result = pwd / (pwd.name+'-result')
 if result.exists():
