@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 def get_prefix(string: str) -> list:
     prefix = []
     for i in range(len(string)-1):
