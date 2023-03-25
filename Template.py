@@ -46,7 +46,7 @@ def main():
     # start here
     function()
     # end
-    log.info('bye')
+    log.info('Bye')
 
 
 if __name__ == '__main__':
