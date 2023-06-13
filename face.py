@@ -123,7 +123,8 @@ def face_detection_dnn():
     while True:
         ret, frame = cap.read()
         height, width = frame.shape[:2]
-        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+        # blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (100.0, 100.0, 100.0))
         net.setInput(blob)
         detections = net.forward()
         # loop over the detections to extract specific confidence
@@ -185,7 +186,7 @@ def get_face_imgs(number=5):
     from faker import Faker
     import requests
 
-    f = Faker(locale='zh')
+    f = Faker(locale='en')
 
     folder = Path('./train')
     if not folder.exists():
@@ -211,18 +212,22 @@ def face_recognition():
 
     from pathlib import Path
 
-    train_folder = get_face_imgs()
+    # train_folder = get_face_imgs()
+    train_folder = Path('./train')
     face_sample = list()
     names = list()
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     n = 0
     id_name = dict()
-    for img_file in train_folder.glob('*.webp'):
+    for img_file in train_folder.glob('*'):
+        print('Train', img_file)
         name = img_file.stem
         id_name[n] = name
-        # img = cv2.imread(str(img_file), cv2.IMREAD_GRAYSCALE)
         img = cv2.imread(str(img_file))
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        if img is None:
+            print('bad image', img_file)
+            continue
+        # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = get_face(img)
         #for face_box in faces:
         x1, y1, x2, y2 = faces[0]
@@ -231,7 +236,7 @@ def face_recognition():
         face_sample.append(face_gray)
         names.append(n)
         n = n + 1
-    out_filename = str(train_folder/'trainer.yml')
+    out_filename = 'trainer.yml'
     recognizer.train(face_sample, np.array(names))
     recognizer.write(out_filename)
     recognizer.read(out_filename)
@@ -242,7 +247,6 @@ def face_recognition():
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('gray', gray)
         faces = get_face(frame)
         if len(faces) == 0:
             print('Face not found.')
@@ -250,13 +254,13 @@ def face_recognition():
         for face in faces:
             x1, y1, x2, y2 = face
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            # if max(x1, x2, width) != width or max(y1, y2, height) != height:
-            # print(gray.shape, face, gray_face.shape, gray_face.size)
-            #    continue
             gray_face = gray[x1:x2, y1:y2]
-            if gray_face.size == 0:
+            #if gray_face.size == 0:
+            #    continue
+            try:
+                detect_id, confidence = recognizer.predict(gray_face)
+            except Exception:
                 continue
-            detect_id, confidence = recognizer.predict(gray_face)
             if 0 <= confidence <= 100:
                 detect_name = id_name[detect_id]
             else:
