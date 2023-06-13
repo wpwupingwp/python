@@ -149,7 +149,6 @@ def face_detection_dnn():
     cv2.destroyAllWindows()
     return
 
-
 def get_face(frame):
     import cv2
     import numpy as np
@@ -190,12 +189,14 @@ def get_face_imgs(number=5):
     folder = Path('./train')
     if not folder.exists():
         folder.mkdir()
+    if len(list(folder.glob('*.webp'))) >= number:
+        return folder
     url = 'https://thispersondoesnotexist.com/'
     number = 5
     for _ in range(number):
         r = requests.get(url)
         filename = f.name() + '.webp'
-        out = open(filename, 'wb')
+        out = open(folder/filename, 'wb')
         out.write(r.content)
         print('Got', filename)
         sleep(2)
@@ -220,7 +221,8 @@ def face_recognition():
         id_name[n] = name
         n = n + 1
         fake_name = str(n)
-        img = cv2.imread(str(img_file), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+        # img = cv2.imread(str(img_file), cv2.IMREAD_GRAYSCALE)
+        img = cv2.imread(str(img_file))
         faces = get_face(img)
         for face_box in faces:
             x1, y1, x2, y2 = face_box
@@ -253,3 +255,5 @@ def face_recognition():
             break
     cap.release()
     cv2.destroyAllWindows()
+
+face_recognition()
