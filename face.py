@@ -151,6 +151,12 @@ def face_detection_dnn():
 
 
 def get_face(frame):
+    import cv2
+    import numpy as np
+    model_text = 'deploy.prototxt'
+    model_file = 'res10_300x300_ssd_iter_140000_fp16.caffemodel'
+
+    net = cv2.dnn.readNetFromCaffe(model_text, model_file)
     height, width = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
     net.setInput(blob)
@@ -247,49 +253,3 @@ def face_recognition():
             break
     cap.release()
     cv2.destroyAllWindows()
-
-
-
-
--
--
--
--
--    names = list()
--    encodings = list()
-    # image_file = argv[1]
-    # https://github.com/spmallick/learnopencv/blob/master/FaceDetectionComparison/models/deploy.prototxt
-    model_text = 'deploy.prototxt'
-    model_file = 'res10_300x300_ssd_iter_140000_fp16.caffemodel'
-
-    net = cv2.dnn.readNetFromCaffe(model_text, model_file)
-
-    cap = cv2.VideoCapture(1)
-    while True:
-        ret, frame = cap.read()
-        height, width = frame.shape[:2]
-        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-        net.setInput(blob)
-        detections = net.forward()
-        # loop over the detections to extract specific confidence
-        for i in range(0, detections.shape[2]):
-            confidence = detections[0, 0, i, 2]
-            if confidence < 0.5:
-                continue
-            # compute the boxes (x, y)-coordinates
-            box = detections[0, 0, i, 3:7] * np.array([width, height, width, height])
-            (x1, y1, x2, y2) = box.astype('int')
-            if y1 - 10 > 10:
-                y = y1 - 10
-            else:
-                y = y1 + 10
-            text = '{:.2f}'.format(confidence * 100)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, text, (x1, y), cv2.LINE_AA, 0.45, (0, 0, 255), 2)
-        cv2.imshow('video', frame)
-        k = cv2.waitKey()
-        if k == 27:  # press 'ESC' to quit
-            break
-    cap.release()
-    cv2.destroyAllWindows()
-    return
