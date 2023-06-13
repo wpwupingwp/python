@@ -171,9 +171,9 @@ def get_face(frame):
         box = detections[0, 0, i, 3:7] * np.array([width, height, width, height])
         (x1, y1, x2, y2) = box.astype('int')
         if y1 - 10 > 10:
-            y = y1 - 10
+            y1 = y1 - 10
         else:
-            y = y1 + 10
+            y1 = y1 + 10
         face = (x1, y1, x2, y2)
         faces.append(face)
     return faces
@@ -227,8 +227,6 @@ def face_recognition():
         #for face_box in faces:
         x1, y1, x2, y2 = faces[0]
         face = img[x1:x2, y1:y2]
-        cv2.imshow('f', face)
-        cv2.waitKey()
         face_gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         face_sample.append(face_gray)
         names.append(n)
@@ -239,14 +237,26 @@ def face_recognition():
     recognizer.read(out_filename)
 
     cap = cv2.VideoCapture(1)
+    ret, frame = cap.read()
+    height, width = frame.shape[:2]
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.imshow('gray', gray)
         faces = get_face(frame)
+        if len(faces) == 0:
+            print('Face not found.')
+            continue
         for face in faces:
             x1, y1, x2, y2 = face
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            detect_id, confidence = recognizer.predict(gray[x1:x2, y1:y2])
+            # if max(x1, x2, width) != width or max(y1, y2, height) != height:
+            # print(gray.shape, face, gray_face.shape, gray_face.size)
+            #    continue
+            gray_face = gray[x1:x2, y1:y2]
+            if gray_face.size == 0:
+                continue
+            detect_id, confidence = recognizer.predict(gray_face)
             if 0 <= confidence <= 100:
                 detect_name = id_name[detect_id]
             else:
