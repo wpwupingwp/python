@@ -157,7 +157,8 @@ def get_face(frame):
 
     net = cv2.dnn.readNetFromCaffe(model_text, model_file)
     height, width = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+    # blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
+    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (100.0, 100.0, 100.0))
     net.setInput(blob)
     detections = net.forward()
     faces = list()
@@ -219,19 +220,23 @@ def face_recognition():
     for img_file in train_folder.glob('*.webp'):
         name = img_file.stem
         id_name[n] = name
-        n = n + 1
-        fake_name = str(n)
         # img = cv2.imread(str(img_file), cv2.IMREAD_GRAYSCALE)
         img = cv2.imread(str(img_file))
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = get_face(img)
-        for face_box in faces:
-            x1, y1, x2, y2 = face_box
-            face = img[x1:x2, y1:y2]
-            face_sample.append(face)
-            names.append(fake_name)
-    recognizer.train(faces, np.array(names))
-    recognizer.write(train_folder / 'trainer.yml')
-    recognizer.read(train_folder / 'trainer.yml')
+        #for face_box in faces:
+        x1, y1, x2, y2 = faces[0]
+        face = img[x1:x2, y1:y2]
+        cv2.imshow('f', face)
+        cv2.waitKey()
+        face_gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+        face_sample.append(face_gray)
+        names.append(n)
+        n = n + 1
+    out_filename = str(train_folder/'trainer.yml')
+    recognizer.train(face_sample, np.array(names))
+    recognizer.write(out_filename)
+    recognizer.read(out_filename)
 
     cap = cv2.VideoCapture(1)
     while True:
