@@ -124,7 +124,8 @@ def face_detection_dnn():
         ret, frame = cap.read()
         height, width = frame.shape[:2]
         # blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (100.0, 100.0, 100.0))
+        # blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (100.0, 100.0, 100.0))
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (100.0, 100.0, 100.0))
         net.setInput(blob)
         detections = net.forward()
         # loop over the detections to extract specific confidence
@@ -150,6 +151,26 @@ def face_detection_dnn():
     cv2.destroyAllWindows()
     return
 
+def get_face2(frame):
+    import numpy as np
+    import cv2
+    from pathlib import Path
+    classifier_file1 = Path(
+        cv2.__file__).parent / 'data' / 'haarcascade_frontalface_default.xml'
+    faceCascade = cv2.CascadeClassifier(str(classifier_file1))
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.2,
+        minNeighbors=5,
+        minSize=(20, 20)
+    )
+    result = list()
+    for (x, y, w, h) in faces:
+        result.append((x, x+w, y, y+h))
+    return result
+
+
 def get_face(frame):
     import cv2
     import numpy as np
@@ -159,7 +180,7 @@ def get_face(frame):
     net = cv2.dnn.readNetFromCaffe(model_text, model_file)
     height, width = frame.shape[:2]
     # blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (100.0, 100.0, 100.0))
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (100.0, 100.0, 100.0))
     net.setInput(blob)
     detections = net.forward()
     faces = list()
