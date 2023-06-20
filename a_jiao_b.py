@@ -9,4 +9,4 @@ a = data.iloc[:, 0]
 b = data.iloc[:, 1]
 a_jian_b = set(a.unique()) & set(b.unique())
 out = pd.DataFrame(a_jian_b)
-out.to_excel(filename.with_name('jiaoji.xlsx'))
+out.to_excel(filename.with_name('jiaoji.xlx'))
