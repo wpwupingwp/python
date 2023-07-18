@@ -34,8 +34,8 @@ blue = '#2a4a8b,#0091b5'.split(',') #trna rrna
 green = '#058240' #spacer
 gray = '#adcacb,#d3dcc8,#a4bfd1'.split(',') #others
 colors = [red, *yellow, *blue, green, *gray]
-plt.bar(colors, [1]*len(colors), color=colors)
-plt.show()
+# plt.bar(colors, [1]*len(colors), color=colors)
+# plt.show()
 print(colors)
 
 
@@ -45,7 +45,8 @@ def parse_args():
         description=main.__doc__)
     arg.add_argument('-input', help='input file',
                      default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
-    arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot', 'stack'),
+    arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot',
+                                       'stack', 'bar'),
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix',
                      default='draw_out')
@@ -115,13 +116,13 @@ def svg2emf(plt, arg):
     log.info('Convert svg to emf:')
     log.info(cmd)
     _ = run(cmd, shell=True)
-    if _.returncode:
-        log.error('Conversion failed.')
-        return arg.out
     if arg.no_show:
         pass
     else:
         plt.show()
+    if _.returncode:
+        log.error('Conversion failed.')
+        return arg.out
     return arg.out
 
 
@@ -197,37 +198,42 @@ def boxplot2(arg):
     return arg.out
 
 
+
+def barplot(arg):
+    """
+    table format:
+    field,number
+    A,2
+    B,3
+    """
+    data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    labels = data.iloc[:,0]
+    count = data.iloc[:,1]
+    if arg.italic:
+        labels = [f'${{{i}}}$' for i in labels]
+    pie = plt.bar(labels, count, color=colors)
+    plot_set(plt, arg)
+    svg2emf(plt, arg)
+    return arg.out
+
+
 def pieplot(arg):
     """
     table format:
-    field
-    A
-    A
-    B
-    C
+    field,number
+    A,2
+    B,3
     """
     def func(pct, values):
         absolute = int(round(pct/100*sum(values)))
         return f'{pct/100:.1%}, {absolute}'
 
     data = pd.read_excel(arg.input, sheet_name=arg.sheet)
-    key = data.columns[0]
-    groupby = data.groupby(key)[key]
-    count_label = [(i, j[0]) for i, j in zip(groupby.count(), groupby.unique())]
-    print(count_label)
-    count_label.sort(key=lambda x:x[0], reverse=True)
-    count_raw = [i[0] for i in count_label]
-    labels = [i[1] for i in count_label]
+    labels = data.iloc[:,0]
+    count = data.iloc[:,1]
+    print(labels, count)
     if arg.italic:
         labels = [f'${{{i}}}$' for i in labels]
-    if arg.merge_small:
-        count = count_raw[:8]
-        others = sum(count_raw[8:])
-        count.append(others)
-        labels = labels[:8]
-        labels.append('Others')
-    else:
-        count = count_raw
     pie = plt.pie(count, labels=labels, autopct=lambda pct: func(pct, count),
                   colors=colors)
     svg2emf(plt, arg)
@@ -293,7 +299,7 @@ def main():
     log.info('python3 '+' '.join(argv))
     # start here
     type_func = {'box': boxplot, 'pie': pieplot, 'groupbox': boxplot2,
-                 'dot': scatter, 'stack': stackplot}
+                 'dot': scatter, 'stack': stackplot, 'bar': barplot}
     func = type_func.get(arg.type, 'None')
     if func is None:
         raise ValueError('Figure type is invalid.')
