@@ -11,11 +11,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rcParams, ticker
 # config figure
-params = {'axes.labelsize': 12, 'axes.linewidth': 1.5, 'axes.titlesize': 20,
-          'font.size': 10, 'font.family': 'sans-serif',
-          'lines.linewidth': 1.5,
-          'legend.fontsize': 10, 'legend.handlelength': 2,
-          'figure.figsize': (8, 6), 'figure.dpi': 300}
+font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'xx-large',
+                 'xtick.labelsize': 'xx-large', 'ytick.labelsize': 'x-large'}
+rcParams.update(font_settings)
+params = {'axes.linewidth': 1.5, 'font.family': 'sans-serif',
+          'lines.linewidth': 1.5, 'legend.handlelength': 2,
+          'figure.figsize': (16, 9)}
 rcParams.update(params)
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
@@ -32,7 +33,7 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=main.__doc__)
     arg.add_argument('-input', help='input file',
-                     default=r'E:\Onedrive\IBCAS\Thesis\学位论文\figure\figure.xlsx')
+                     default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
     arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot', 'stack'),
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix')
