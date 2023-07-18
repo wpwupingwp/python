@@ -27,6 +27,17 @@ import coloredlogs
 coloredlogs.install(level=Default_level, fmt=FMT, datefmt=DATEFMT)
 log = logging.getLogger(__name__)
 
+# colors
+red = '#db5000' #gene
+yellow = '#eeba00,#f8d90f'.split(',') #cds, intron
+blue = '#2a4a8b,#0091b5'.split(',') #trna rrna
+green = '#058240' #spacer
+gray = '#adcacb,#d3dcc8,#a4bfd1'.split(',') #others
+colors = [red, *yellow, *blue, green, *gray]
+plt.bar(colors, [1]*len(colors), color=colors)
+plt.show()
+print(colors)
+
 
 def parse_args():
     arg = argparse.ArgumentParser(
@@ -36,7 +47,8 @@ def parse_args():
                      default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
     arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot', 'stack'),
                      default='box', help='figure type')
-    arg.add_argument('-o', '-out', dest='out', help='output prefix')
+    arg.add_argument('-o', '-out', dest='out', help='output prefix',
+                     default='draw_out')
     arg.add_argument('-no_show', action='store_true', help='show figure')
     option = arg.add_argument_group('Options')
     option.add_argument('-sheet', default=0, type=int, help='sheet index')
@@ -96,14 +108,16 @@ def plot_set(plt, arg):
 
 def svg2emf(plt, arg):
     svg = arg.out.with_suffix('.svg')
+    pdf = arg.out.with_suffix('.pdf')
     plt.savefig(svg)
+    plt.savefig(pdf)
     cmd = f'{arg.inkscape} -o "{arg.out}" "{svg}"'
     log.info('Convert svg to emf:')
     log.info(cmd)
     _ = run(cmd, shell=True)
     if _.returncode:
         log.error('Conversion failed.')
-        raise SystemExit(-2)
+        return arg.out
     if arg.no_show:
         pass
     else:
@@ -118,8 +132,6 @@ def boxplot(arg):
     1,2,3
     4,5,6
     """
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    colors = []
     flierprops = dict(marker='o', markeredgewidth=0.5,
                       markersize=5, alpha=0.5)
     boxprops = dict(linewidth=0.5, alpha=0.9)
@@ -150,7 +162,6 @@ def boxplot2(arg):
     table:
     group1-a,group2-a,group1-b,group2-b
     """
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     flierprops = dict(marker='o', markeredgewidth=0.5,
                       markersize=5, alpha=0.5)
     boxprops = dict(linestyle='-', linewidth=0.5, alpha=0.9)
@@ -199,7 +210,6 @@ def pieplot(arg):
         absolute = int(round(pct/100*sum(values)))
         return f'{pct/100:.1%}, {absolute}'
 
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     data = pd.read_excel(arg.input, sheet_name=arg.sheet)
     key = data.columns[0]
     groupby = data.groupby(key)[key]
@@ -253,8 +263,6 @@ def stackplot(arg):
     1,2,3
     4,5,6
     """
-    # colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    colors = '#2a4a8b #0091b5 #f8d90f #eeba00 #db5000 #80a71a #d3dcc8 #a4bfd1'.split()
     # grey
     textprops = dict(fontsize=8)
     raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
