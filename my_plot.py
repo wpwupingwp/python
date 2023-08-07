@@ -11,12 +11,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rcParams, ticker
 # config figure
-font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'xx-large',
-                 'xtick.labelsize': 'xx-large', 'ytick.labelsize': 'x-large'}
+font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'x-large',
+                 'xtick.labelsize': 'xx-large', 'ytick.labelsize': 'xx-large'}
 rcParams.update(font_settings)
+big = (16, 9)
+small = (4, 3)
 params = {'axes.linewidth': 1.5, 'font.family': 'sans-serif',
           'lines.linewidth': 1.5, 'legend.handlelength': 2,
-          'figure.figsize': (16, 9)}
+          'figure.figsize': big}
 rcParams.update(params)
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
@@ -28,14 +30,13 @@ coloredlogs.install(level=Default_level, fmt=FMT, datefmt=DATEFMT)
 log = logging.getLogger(__name__)
 
 # colors
-red = '#db5000' #gene
-yellow = '#eeba00,#f8d90f'.split(',') #cds, intron
+yellow = '#f79327,#db5000,#f8d90f'.split(',') #gene,cds, intron
 blue = '#2a4a8b,#0091b5'.split(',') #trna rrna
 green = '#058240' #spacer
 gray = '#adcacb,#d3dcc8,#a4bfd1'.split(',') #others
-colors = [red, *yellow, *blue, green, *gray]
-# plt.bar(colors, [1]*len(colors), color=colors)
-# plt.show()
+colors = [*yellow, *blue, green, *gray]
+plt.bar(colors, [1]*len(colors), color=colors)
+plt.show()
 print(colors)
 
 
@@ -207,12 +208,15 @@ def barplot(arg):
     B,3
     """
     data = pd.read_excel(arg.input, sheet_name=arg.sheet)
-    labels = data.iloc[:,0]
-    count = data.iloc[:,1]
+    labels = data.iloc[:,0].values.tolist()
+    count = data.iloc[:,1].values.tolist()
     if arg.italic:
         labels = [f'${{{i}}}$' for i in labels]
     pie = plt.bar(labels, count, color=colors)
+    for i in range(len(labels)):
+        plt.text(i, count[i], count[i], ha='center', fontsize=16)
     plot_set(plt, arg)
+    plt.xticks(ticks=labels, labels=labels, rotation=0)
     svg2emf(plt, arg)
     return arg.out
 
