@@ -43,6 +43,7 @@ def parse_args():
                      default='draw_out')
     arg.add_argument('-small', action='store_true', help='small image')
     arg.add_argument('-no_show', action='store_true', help='show figure')
+    arg.add_argument('-legend', default='', help='legend for group box')
     option = arg.add_argument_group('Options')
     option.add_argument('-sheet', default=0, type=int, help='sheet index')
     option.add_argument('-horizon', action='store_false',
@@ -76,6 +77,7 @@ def init_arg(arg):
         arg.out = arg.input.parent / (arg.out+'.emf')
     if arg.out.exists():
         log.warning(f'Output file {arg.out} exists.')
+    arg.legend = arg.legend.split(',')
     # add file log
     log_filename = arg.input.with_suffix('.log')
     log_file = logging.FileHandler(log_filename)
@@ -182,8 +184,10 @@ def boxplot2(arg):
             for patch, color in zip(bp['boxes'], colors):
                 patch.set_color(color)
                 patch.set_facecolor('none')
-    draw(group_1, -0.2, True)
-    draw(group_2, 0.2, False)
+        return bp
+    bp1 = draw(group_1, -0.2, True)
+    bp2 = draw(group_2, 0.2, False)
+    plt.legend([bp1['boxes'][0], bp2['boxes'][0]], arg.legend, loc='upper right')
     plot_set(plt, arg)
     plt.xticks(np.arange(0, 5), labels=labels)
     svg2emf(plt, arg)
@@ -295,7 +299,7 @@ def main():
     # start here
     # config figure
     if arg.small:
-        font_settings = {'legend.fontsize': 'large', 'axes.labelsize': 'medium',
+        font_settings = {'legend.fontsize': 'medium', 'axes.labelsize': 'medium',
                          'xtick.labelsize': 'medium', 'ytick.labelsize': 'medium'}
         size = (8, 6)
     else:
