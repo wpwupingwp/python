@@ -25,8 +25,8 @@ blue = '#2a4a8b,#0091b5'.split(',') #trna rrna
 green = '#058240' #spacer
 gray = '#adcacb,#d3dcc8,#a4bfd1'.split(',') #others
 colors = [*yellow, *blue, green, *gray]
-plt.bar(colors, [1]*len(colors), color=colors)
-plt.show()
+# plt.bar(colors, [1]*len(colors), color=colors)
+# plt.show()
 print(colors)
 
 
@@ -44,6 +44,7 @@ def parse_args():
     arg.add_argument('-small', action='store_true', help='small image')
     arg.add_argument('-no_show', action='store_true', help='show figure')
     arg.add_argument('-legend', default='', help='legend for group box')
+    arg.add_argument('-diff_y', action='store_true', help='different y axis')
     option = arg.add_argument_group('Options')
     option.add_argument('-sheet', default=0, type=int, help='sheet index')
     option.add_argument('-horizon', action='store_false',
@@ -157,18 +158,20 @@ def boxplot2(arg):
     table:
     group1-a,group2-a,group1-b,group2-b
     """
-    flierprops = dict(marker='o', markeredgewidth=0.5,
-                      markersize=5, alpha=0.5)
-    boxprops = dict(linestyle='-', linewidth=0.5, alpha=0.9)
-    # grey
-    medianprops = dict(linestyle='-', linewidth=0.9, alpha=0.8, color='#ddddee')
+    box_color = colors[1:]
+    flierprops = dict(marker='o', markeredgecolor='none', markerfacecolor='black',
+                      markersize=3, alpha=1)
+    boxprops = dict(linestyle='-', linewidth=2, alpha=0.9)
+    # purple
+    medianprops = dict(linestyle='-', linewidth=0.8, alpha=0.8, color='#322653')
     textprops = dict(fontsize=8)
     raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
     labels = [raw_data.columns[i] for i in range(0, len(raw_data.columns), 2)]
     filtered_data = [raw_data[i].dropna() for i in raw_data]
     group_1 = [filtered_data[i] for i in range(0, len(filtered_data), 2)]
     group_2 = [filtered_data[i] for i in range(1, len(filtered_data), 2)]
-    def draw(data, offset, fill=True):
+    fig, ax = plt.subplots()
+    def draw(data, offset, ax, fill=True):
         pos = np.arange(len(data)) + offset
         bp = plt.boxplot(data, positions=pos, notch=arg.notch, widths=0.35,
                          # labeldistance=5,
@@ -177,16 +180,21 @@ def boxplot2(arg):
                          boxprops=boxprops, medianprops=medianprops)
         # textprops=textprops)
         if not fill:
-            for patch, color in zip(bp['boxes'], colors):
-                patch.set_color('black')
-                patch.set_facecolor(color)
-        else:
-            for patch, color in zip(bp['boxes'], colors):
+            for patch, color in zip(bp['boxes'], box_color):
                 patch.set_color(color)
                 patch.set_facecolor('none')
+        else:
+            for patch, color in zip(bp['boxes'], box_color):
+                patch.set_color(color)
+                patch.set_facecolor(color)
         return bp
-    bp1 = draw(group_1, -0.2, True)
-    bp2 = draw(group_2, 0.2, False)
+    bp1 = draw(group_1, -0.2, ax, True)
+    if arg.diff_y:
+        ax.set_ylabel(arg.y)
+        ax2 = ax.twinx()
+    else:
+        ax2 = ax
+    bp2 = draw(group_2, 0.2, ax2, False)
     plt.legend([bp1['boxes'][0], bp2['boxes'][0]], arg.legend, loc='upper right')
     plot_set(plt, arg)
     plt.xticks(np.arange(0, 5), labels=labels)
