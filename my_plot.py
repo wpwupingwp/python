@@ -10,16 +10,6 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rcParams, ticker
-# config figure
-font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'x-large',
-                 'xtick.labelsize': 'xx-large', 'ytick.labelsize': 'xx-large'}
-rcParams.update(font_settings)
-big = (16, 9)
-small = (4, 3)
-params = {'axes.linewidth': 1.5, 'font.family': 'sans-serif',
-          'lines.linewidth': 1.5, 'legend.handlelength': 2,
-          'figure.figsize': big}
-rcParams.update(params)
 # define logger
 FMT = '%(asctime)s %(levelname)-8s %(message)s'
 DATEFMT = '%H:%M:%S'
@@ -51,6 +41,7 @@ def parse_args():
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix',
                      default='draw_out')
+    arg.add_argument('-small', action='store_true', help='small image')
     arg.add_argument('-no_show', action='store_true', help='show figure')
     option = arg.add_argument_group('Options')
     option.add_argument('-sheet', default=0, type=int, help='sheet index')
@@ -214,7 +205,7 @@ def barplot(arg):
         labels = [f'${{{i}}}$' for i in labels]
     pie = plt.bar(labels, count, color=colors)
     for i in range(len(labels)):
-        plt.text(i, count[i], count[i], ha='center', fontsize=16)
+        plt.text(i, count[i], count[i], ha='center', fontsize=8)
     plot_set(plt, arg)
     plt.xticks(ticks=labels, labels=labels, rotation=0)
     svg2emf(plt, arg)
@@ -302,6 +293,20 @@ def main():
     arg = init_arg(arg)
     log.info('python3 '+' '.join(argv))
     # start here
+    # config figure
+    if arg.small:
+        font_settings = {'legend.fontsize': 'large', 'axes.labelsize': 'medium',
+                         'xtick.labelsize': 'medium', 'ytick.labelsize': 'medium'}
+        size = (8, 6)
+    else:
+        font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'xx-large', 
+                         'xtick.labelsize': 'x-large', 'ytick.labelsize': 'x-large'}
+        size = (16, 9)
+    rcParams.update(font_settings)
+    params = {'axes.linewidth': 1.5, 'font.family': 'sans-serif',
+              'lines.linewidth': 1.5, 'legend.handlelength': 2,
+              'figure.figsize': size}
+    rcParams.update(params)
     type_func = {'box': boxplot, 'pie': pieplot, 'groupbox': boxplot2,
                  'dot': scatter, 'stack': stackplot, 'bar': barplot}
     func = type_func.get(arg.type, 'None')
