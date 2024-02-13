@@ -37,7 +37,7 @@ def parse_args():
     arg.add_argument('-input', help='input file',
                      default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
     arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot',
-                                       'stack', 'bar'),
+                                       'stack', 'bar', 'groupviolin'),
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix',
                      default='draw_out')
@@ -98,7 +98,7 @@ def plot_set(plt, arg):
     if arg.y_percent:
         #plt.yticks(np.arange(0, 1.1, 0.1))
         ax = plt.gca()
-        ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=2))
+        ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
     pass
 
 
@@ -171,6 +171,7 @@ def boxplot2(arg):
     group_1 = [filtered_data[i] for i in range(0, len(filtered_data), 2)]
     group_2 = [filtered_data[i] for i in range(1, len(filtered_data), 2)]
     fig, ax = plt.subplots()
+    ax.set_xlabel(arg.x)
     def draw(data, offset, ax, fill=True):
         pos = np.arange(len(data)) + offset
         bp = plt.boxplot(data, positions=pos, notch=arg.notch, widths=0.35,
@@ -201,6 +202,51 @@ def boxplot2(arg):
     svg2emf(plt, arg)
     return arg.out
 
+
+
+def violin2(arg):
+    """
+    violin for two groups of data
+    table:
+    group1-a,group2-a,group1-b,group2-b
+    """
+    box_color = colors[1:]
+    raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    labels = [raw_data.columns[i] for i in range(0, len(raw_data.columns), 2)]
+    filtered_data = [raw_data[i].dropna() for i in raw_data]
+    group_1 = [filtered_data[i] for i in range(0, len(filtered_data), 2)]
+    group_2 = [filtered_data[i] for i in range(1, len(filtered_data), 2)]
+    fig, ax = plt.subplots()
+    ax.set_xlabel(arg.x)
+    def draw(data, offset, ax, fill=True):
+        pos = np.arange(len(data)) + offset
+        bp = ax.violinplot(data, positions=pos, widths=0.35,
+                         vert=arg.horizon,
+                         showmeans=False,
+                         showmedians=False,
+                         showextrema=False)
+
+        for patch, color in zip(bp['bodies'], box_color):
+            patch.set_color(color)
+            patch.set_alpha(1)
+            if not fill:
+                patch.set_facecolor('none')
+            else:
+                patch.set_facecolor(color)
+            patch.set_linewidth(2)
+        return bp
+    bp1 = draw(group_1, -0.2, ax, True)
+    if arg.diff_y:
+        ax.set_ylabel(arg.y)
+        ax2 = ax.twinx()
+    else:
+        ax2 = ax
+    bp2 = draw(group_2, 0.2, ax2, False)
+    plt.legend([bp1['bodies'][0], bp2['bodies'][0]], arg.legend, loc='upper right')
+    plot_set(plt, arg)
+    plt.xticks(np.arange(0, 5), labels=labels)
+    svg2emf(plt, arg)
+    return arg.out
 
 
 def barplot(arg):
@@ -307,9 +353,9 @@ def main():
     # start here
     # config figure
     if arg.small:
-        font_settings = {'legend.fontsize': 'medium', 'axes.labelsize': 'medium',
-                         'xtick.labelsize': 'medium', 'ytick.labelsize': 'medium'}
-        size = (8, 6)
+        font_settings = {'legend.fontsize': 'large', 'axes.labelsize': 'x-large',
+                         'xtick.labelsize': 'large', 'ytick.labelsize': 'large'}
+        size = (7, 5)
     else:
         font_settings = {'legend.fontsize': 'xx-large', 'axes.labelsize': 'xx-large', 
                          'xtick.labelsize': 'x-large', 'ytick.labelsize': 'x-large'}
@@ -320,7 +366,8 @@ def main():
               'figure.figsize': size}
     rcParams.update(params)
     type_func = {'box': boxplot, 'pie': pieplot, 'groupbox': boxplot2,
-                 'dot': scatter, 'stack': stackplot, 'bar': barplot}
+                 'dot': scatter, 'stack': stackplot, 'bar': barplot, 
+                 'groupviolin': violin2}
     func = type_func.get(arg.type, 'None')
     if func is None:
         raise ValueError('Figure type is invalid.')
