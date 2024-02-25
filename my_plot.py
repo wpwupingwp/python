@@ -59,7 +59,7 @@ def parse_args():
                         help='set y ticks to percent')
     option.add_argument('-notch', action='store_true', help='notch of boxplot')
     option.add_argument('-inkscape',
-                        default=r'"D:\Program Files\Inkscape\bin\inkscape.exe"',
+                        default=r'"C:\Program Files\Inkscape\bin\inkscape.exe"',
                         help='inkscape path, for convert figure to emf')
     return arg.parse_args()
 
