@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import argparse
 import logging
 from pathlib import Path
@@ -37,7 +35,8 @@ def parse_args():
     arg.add_argument('-input', help='input file',
                      default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
     arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot',
-                                       'stack', 'bar', 'groupviolin'),
+                                       'stack', 'bar', 'groupviolin',
+                                       'stackbar'),
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix',
                      default='draw_out')
@@ -325,6 +324,7 @@ def stackplot(arg):
     # grey
     textprops = dict(fontsize=8)
     raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    print(raw_data, raw_data.dtypes)
     labels = raw_data.columns
     filtered_data = [raw_data[i].dropna() for i in raw_data]
     sp = plt.stackplot(range(len(filtered_data[0])), filtered_data,
@@ -337,6 +337,36 @@ def stackplot(arg):
     #plt.xticks([])
     plt.yticks([0, 50000, 100000, 150000, 200000],
                ['0', '50,000', '100,000', '150,000', '200,000'])
+    svg2emf(plt, arg)
+    return arg.out
+
+
+
+def stackplot2(arg):
+    """
+    table format:
+    Type,field1,field2,field3
+    A,1,2,3
+    B,4,5,6
+    """
+    # grey
+    raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    print(raw_data) 
+    labels = raw_data.columns
+    filtered_data = [raw_data[i].dropna() for i in raw_data]
+    types = filtered_data[0]
+    print(types)
+    for i in range(1, len(filtered_data)):
+        p1 = plt.bar(types, filtered_data[i],
+                     label=labels[i])
+    #for patch, color in zip(sp['stacks'], colors):
+    #    patch.set_facecolor(color)
+    plot_set(plt, arg)
+    plt.legend(loc='upper left')
+    # plt.xticks(np.arange(1, len(labels)+1), labels=labels)
+    plt.xticks(types, types)
+    #plt.yticks([0, 50000, 100000, 150000, 200000],
+    #           ['0', '50,000', '100,000', '150,000', '200,000'])
     svg2emf(plt, arg)
     return arg.out
 
@@ -367,7 +397,7 @@ def main():
     rcParams.update(params)
     type_func = {'box': boxplot, 'pie': pieplot, 'groupbox': boxplot2,
                  'dot': scatter, 'stack': stackplot, 'bar': barplot, 
-                 'groupviolin': violin2}
+                 'groupviolin': violin2, 'stackbar': stackplot2}
     func = type_func.get(arg.type, 'None')
     if func is None:
         raise ValueError('Figure type is invalid.')
