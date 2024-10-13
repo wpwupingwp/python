@@ -36,7 +36,7 @@ def parse_args():
                      default=r'E:\Onedrive\IBCAS\Paper\BarcodeFinder\Figure\draw.xlsx')
     arg.add_argument('-type', choices=('box', 'groupbox', 'pie', 'dot',
                                        'stack', 'bar', 'groupviolin',
-                                       'stackbar'),
+                                       'stackbar', 'violin'),
                      default='box', help='figure type')
     arg.add_argument('-o', '-out', dest='out', help='output prefix',
                      default='draw_out')
@@ -203,6 +203,27 @@ def boxplot2(arg):
 
 
 
+def violin(arg):
+    """
+    table:
+    Name, value
+    a,1
+    b,2
+    c,3
+    """
+    raw_data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    data = raw_data[raw_data.columns[1]]
+    import seaborn as sns
+    plt.figure(figsize=(3, 6))
+    plot_set(plt, arg)
+    sns.set(font_scale=5)
+    sns.violinplot(y=data, cut=0, width=0.7) 
+    plt.xticks([])
+    plt.yticks(range(0,700,100))
+    svg2emf(plt, arg)
+    return arg.out
+
+
 def violin2(arg):
     """
     violin for two groups of data
@@ -260,7 +281,7 @@ def barplot(arg):
     count = data.iloc[:,1].values.tolist()
     if arg.italic:
         labels = [f'${{{i}}}$' for i in labels]
-    pie = plt.bar(labels, count, color=colors)
+    plt.bar(labels, count, color=colors)
     for i in range(len(labels)):
         plt.text(i, count[i], count[i], ha='center', fontsize=8)
     plot_set(plt, arg)
@@ -272,15 +293,22 @@ def barplot(arg):
 def pieplot(arg):
     """
     table format:
-    field,number
+    Name,Count
     A,2
     B,3
     """
+    small_n = 100
+
     def func(pct, values):
         absolute = int(round(pct/100*sum(values)))
+        # return f'{pct/100:.1%}'
         return f'{pct/100:.1%}, {absolute}'
 
     data = pd.read_excel(arg.input, sheet_name=arg.sheet)
+    if arg.merge_small:
+        data.loc[data[data.columns[1]]<small_n, data.columns[0]] = 'Other journal'
+        data.loc[data[data.columns[1]]<2, data.columns[0]] = 'Rare journal'
+        data = data.groupby(data.columns[0])[data.columns[1]].sum().reset_index()
     labels = data.iloc[:,0]
     count = data.iloc[:,1]
     print(labels, count)
@@ -345,6 +373,7 @@ def stackplot(arg):
 def stackplot2(arg):
     """
     table format:
+    example: treedb figure 2-1
     Type,field1,field2,field3
     A,1,2,3
     B,4,5,6
@@ -397,7 +426,8 @@ def main():
     rcParams.update(params)
     type_func = {'box': boxplot, 'pie': pieplot, 'groupbox': boxplot2,
                  'dot': scatter, 'stack': stackplot, 'bar': barplot, 
-                 'groupviolin': violin2, 'stackbar': stackplot2}
+                 'groupviolin': violin2, 'stackbar': stackplot2,
+                 'violin': violin}
     func = type_func.get(arg.type, 'None')
     if func is None:
         raise ValueError('Figure type is invalid.')
