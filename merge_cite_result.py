@@ -1,8 +1,13 @@
-import pandas as pd
-import sys
 import argparse
+import sys
 import warnings
 from pathlib import Path
+
+# ensure pands dependencies exist
+import xlrd
+import lxml
+import pandas as pd
+
 warnings.filterwarnings('ignore')
 
 def read_cnki_html(cnki_file):
@@ -35,15 +40,8 @@ def read_cnki_html(cnki_file):
         # Check if there are multiple tables
         if len(html_tables) > 1:
             print(f"Found {len(html_tables)} tables, using the first one")
-            
-            # Display table shapes for debugging
-            for i, table in enumerate(html_tables):
-                print(f"Table {i} shape: {table.shape}")
-                print(f"Table {i} columns: {list(table.columns)[:10]}...")
-        
         print(f"CNKI HTML table shape: {df_cnki.shape}")
-        print(f"CNKI columns: {list(df_cnki.columns)}")
-        
+
         # Clean CNKI table special formats
         df_cnki = clean_cnki_dataframe(df_cnki)
         
@@ -88,7 +86,7 @@ def clean_cnki_dataframe(df):
     print("Cleaning CNKI data format...")
     
     # Create a copy to avoid modifying original
-    print(df.iloc[:2,:])
+    # print(df.iloc[:2,:])
     df = df.copy()
     
     # 1. Check for multi-level column index (MultiIndex)
@@ -106,14 +104,11 @@ def clean_cnki_dataframe(df):
         df.columns = new_columns
     
     # 2. Clean column names safely
-    print(f"Original columns: {list(df.columns)}")
-    
+    # print(f"Original columns: {list(df.columns)}")
     # Convert all column names to strings first
     df.columns = [str(col) for col in df.columns]
-    
     # Then apply string operations safely
     df.columns = [col.strip() if isinstance(col, str) else str(col) for col in df.columns]
-    
     # 3. Find and rename CNKI-specific Chinese/English column names
     cnki_column_mapping = {
         # Title related
@@ -213,8 +208,6 @@ def clean_cnki_dataframe(df):
         if col_str in cnki_column_mapping:
             rename_dict[old_col] = cnki_column_mapping[col_str]
             continue
-        
-    
     # Apply renaming
     if rename_dict:
         df = df.rename(columns=rename_dict)
@@ -795,11 +788,9 @@ File formats:
 def init_arg(arg):
     arg.crossref = Path(arg.crossref).resolve()
     arg.endnote = Path(arg.endnote).resolve()
-    if len(arg.cnki) > 1:
-        arg.cnki = merge_cnki(arg.cnki)
-    else:
-        arg.cnki = Path(arg.cnki[0]).resolve()
-    for i in (arg.crossref, arg.endnote, arg.cnki):
+    arg.cnki = [Path(i).resolve() for i in arg.cnki]
+
+    for i in (arg.crossref, arg.endnote, *arg.cnki):
         if not i.exists():
             print(f'Cannot find {i}')
             sys.exit(-1)
@@ -818,14 +809,6 @@ def main():
     print("=" * 60)
     print("This script merges data from Crossref, EndNote, and CNKI sources")
     print("and removes duplicates based on DOI.\n")
-    
-    # Check command line arguments
-    if len(sys.argv) != 4:
-        print("❌ ERROR: Incorrect number of arguments")
-        print("\nUsage: python merge_result.py <crossref.csv> <endnote.xlsx> <cnki.html>")
-        print("\nExample: python merge_result.py crossref.csv endnote.xlsx cnki.html")
-        print("\nNote: CNKI file can be .html, .htm, or .xlsx/.xls format")
-        sys.exit(1)
     
     print("📁 INPUT FILES:")
     print(f"   Crossref: {arg.crossref}")
