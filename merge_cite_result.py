@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+import argparse
 import warnings
 from pathlib import Path
 warnings.filterwarnings('ignore')
@@ -29,7 +30,7 @@ def read_cnki_html(cnki_file):
             raise ValueError("No table found in HTML file")
         
         # Usually the first table contains main data
-        df_cnki = html_tables[0]
+        df_cnki = pd.DataFrame(html_tables[0])
         
         # Check if there are multiple tables
         if len(html_tables) > 1:
@@ -237,12 +238,49 @@ def clean_cnki_dataframe(df):
             # Keep column as is if cleaning fails
     
     print(f"DataFrame shape after cleaning: {df.shape}")
-    print(df)
-    
     return df
 
 
-def merge_tables(crossref_file, endnote_file, cnki_file, output_file='merged_result.xlsx'):
+def read_cnki(cnki_file: Path):
+    # CNKI file (HTML or Excel)
+    cnki_ext = Path(cnki_file).suffix.lower()
+
+    if cnki_ext in ['.html', '.htm']:
+        df_cnki = read_cnki_html(cnki_file)
+    elif cnki_ext in ['.xls', '.xlsx']:
+        print(f'CNKI custom export file uses .xls but is a html table!')
+        df_cnki = read_cnki_html(cnki_file)
+    else:
+        # If it's an Excel file, read normally
+        try:
+            df_cnki = pd.read_excel(cnki_file)
+            print(f"✓ CNKI records: {len(df_cnki)} (Excel format)")
+        except:
+            try:
+                df_cnki = pd.read_excel(cnki_file)
+                print(
+                    f"✓ CNKI records: {len(df_cnki)} (Excel format with xlrd)")
+            except Exception as e:
+                print(f"✗ Cannot read CNKI file: {e}")
+                # Create empty dataframe
+                df_cnki = pd.DataFrame()
+                print("⚠ Created empty DataFrame for CNKI")
+    return df_cnki
+
+
+def merge_cnki(cnki_files: list[Path]):
+    df_list = []
+    for cnki_file in cnki_files:
+        df_cnki = read_cnki(cnki_file)
+        print(f'Read {len(df_cnki)} CNKI records')
+        df_list.append(df_cnki)
+    df_cnki_merge = pd.concat(df_list)
+    print(f'Merged CNKI records: {len(df_cnki_merge)}')
+    return df_cnki_merge
+
+
+def merge_tables(crossref_file: Path, endnote_file: Path, cnki_files: list[Path],
+                 output_file):
     """
     Merge three tables, remove duplicates, and output as xlsx file
     Key fields include: DOI, Title, Authors, Year, Source, Abstract, Keywords
@@ -270,27 +308,8 @@ def merge_tables(crossref_file, endnote_file, cnki_file, output_file='merged_res
     # EndNote Excel file
     df_endnote = pd.read_excel(endnote_file)
     print(f"✓ EndNote records: {len(df_endnote)}")
-    
-    # CNKI file (HTML or Excel)
-    cnki_ext = Path(cnki_file).suffix.lower()
-    
-    if cnki_ext in ['.html', '.htm']:
-        df_cnki = read_cnki_html(cnki_file)
-    else:
-        # If it's an Excel file, read normally
-        try:
-            df_cnki = pd.read_excel(cnki_file)
-            print(f"✓ CNKI records: {len(df_cnki)} (Excel format)")
-        except:
-            try:
-                df_cnki = pd.read_excel(cnki_file, engine='xlrd')
-                print(f"✓ CNKI records: {len(df_cnki)} (Excel format with xlrd)")
-            except Exception as e:
-                print(f"✗ Cannot read CNKI file: {e}")
-                # Create empty dataframe
-                df_cnki = pd.DataFrame()
-                print("⚠ Created empty DataFrame for CNKI")
-    
+
+    df_cnki = merge_cnki(cnki_files)
     print(f"✓ CNKI records: {len(df_cnki)}")
     
     # 2. Unify DOI column names
@@ -604,7 +623,7 @@ def merge_tables(crossref_file, endnote_file, cnki_file, output_file='merged_res
     
     try:
         # Create Excel writer
-        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+        with pd.ExcelWriter(output_file) as writer:
             # Save main data
             final_df.to_excel(writer, index=False, sheet_name='Merged_Data')
             
@@ -742,10 +761,58 @@ def create_statistics_sheet(writer, final_df):
     df_stats.to_excel(writer, index=False, sheet_name='Statistics')
 
 
+def parse_arg():
+    """
+    Parse command line arguments using argparse
+    """
+    parser = argparse.ArgumentParser(
+        description='Merge academic literature data from Crossref/Google Scholar, EndNote, and CNKI sources',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s -c crossref.csv -e endnote.xlsx -k cnki.html -o merged_output.xlsx
+  %(prog)s --crossref crossref.csv --endnote endnote.xlsx --cnki cnki.xlsx --output results.xlsx
+
+File formats:
+  - Crossref: CSV file (comma-separated values)
+  - EndNote: Excel file (.xlsx or .xls)
+  - CNKI: HTML file (.html, .htm) or Excel file (.xlsx, .xls)
+        """
+    )
+
+    # Positional arguments (for backward compatibility)
+    parser.add_argument('-c', '--crossref', dest='crossref',
+        help='Crossref data file in CSV format (alternative to positional argument)' )
+    parser.add_argument('-e', '--endnote', dest='endnote',
+        help='EndNote data file in Excel format (alternative to positional argument)' )
+    parser.add_argument('-k', '--cnki', dest='cnki', nargs='*',
+                         help='CNKI data file in HTML or Excel format (alternative to positional argument)' )
+    parser.add_argument('-o', '--output', default='merged_literature_data.xlsx',
+        help='Output Excel file name (default: merged_literature_data.xlsx)' )
+    return parser.parse_args()
+
+
+def init_arg(arg):
+    arg.crossref = Path(arg.crossref).resolve()
+    arg.endnote = Path(arg.endnote).resolve()
+    if len(arg.cnki) > 1:
+        arg.cnki = merge_cnki(arg.cnki)
+    else:
+        arg.cnki = Path(arg.cnki[0]).resolve()
+    for i in (arg.crossref, arg.endnote, arg.cnki):
+        if not i.exists():
+            print(f'Cannot find {i}')
+            sys.exit(-1)
+    return arg
+
+
 def main():
     """
     Main function to run the merge script
     """
+    arg = parse_arg()
+    arg = init_arg(arg)
+
     print("=" * 60)
     print("ACADEMIC LITERATURE DATABASE MERGER")
     print("=" * 60)
@@ -760,35 +827,17 @@ def main():
         print("\nNote: CNKI file can be .html, .htm, or .xlsx/.xls format")
         sys.exit(1)
     
-    # Get input files from command line
-    crossref_file = sys.argv[1]
-    endnote_file = sys.argv[2]
-    cnki_file = sys.argv[3]
-    
-    # Set output file name
-    output_file = 'merged_literature_data.xlsx'
-    
-    # Check if input files exist
-    files_exist = True
-    for file_path in [crossref_file, endnote_file, cnki_file]:
-        if not Path(file_path).exists():
-            print(f"❌ ERROR: File not found: {file_path}")
-            files_exist = False
-    
-    if not files_exist:
-        sys.exit(1)
-    
     print("📁 INPUT FILES:")
-    print(f"   Crossref: {crossref_file}")
-    print(f"   EndNote:  {endnote_file}")
-    print(f"   CNKI:     {cnki_file}")
-    print(f"   Output:   {output_file}\n")
+    print(f"   Crossref: {arg.crossref}")
+    print(f"   EndNote:  {arg.endnote}")
+    print(f"   CNKI:     {arg.cnki}")
+    print(f"   Output:   {arg.output}\n")
     
     # Run the merge process
     try:
-        result_df = merge_tables(crossref_file, endnote_file, cnki_file, output_file)
+        result_df = merge_tables(arg.crossref, arg.endnote, arg.cnki, arg.output)
         print("\n✅ MERGE PROCESS COMPLETED SUCCESSFULLY!")
-        print(f"📄 Output file: {output_file}")
+        print(f"📄 Output file: {arg.output}")
         
         # Display first few rows
         print("\n📊 PREVIEW OF MERGED DATA:")
