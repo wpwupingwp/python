@@ -561,7 +561,7 @@ def merge_tables(crossref_file: Path, endnote_file: Path, cnki_files: list[Path]
     # Remove duplicates based on cleaned DOI (keep first occurrence)
     if not merged_df_valid.empty:
         original_count = len(merged_df_valid)
-        merged_df_valid = merged_df_valid.drop_duplicates(subset='DOI_Clean', keep='first')
+        merged_df_valid = merged_df_valid.drop_duplicates(subset=['DOI_Clean', 'Title'], keep='first')
         duplicates_removed = original_count - len(merged_df_valid)
         print(f"✓ Removed {duplicates_removed} duplicate records with DOI")
     
