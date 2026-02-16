@@ -5,28 +5,28 @@ from concurrent.futures import ProcessPoolExecutor
 
 
 def convert(old):
-    if old.suffix == '.png':
+    if old.suffix == ".png":
         return old
     try:
         x = Image.open(old)
     except UnidentifiedImageError:
-        print('Skip', old)
+        print("Skip", old)
         return old
-    new = old.with_suffix('.png')
-    x.save(new, 'PNG')
-    print(old, '->', new)
+    new = old.with_suffix(".png")
+    x.save(new, "PNG")
+    print(old, "->", new)
     return new
 
 
 def main():
-    print('start')
-    files = Path('.').glob('*.*')
+    print("start")
+    files = Path(".").glob("*.*")
     files_list = list(files)
     with ProcessPoolExecutor() as pool:
         results = [pool.submit(convert, i) for i in files_list]
     pool.shutdown(wait=True)
-    print('done')
+    print("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

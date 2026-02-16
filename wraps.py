@@ -10,16 +10,16 @@ def print_time(function):
         start = timer()
         result = function(*args, **kargs)
         end = timer()
-        print('The function {0} Cost {1:3f}s.\n'.format(
-            function.__name__, end-start))
+        print("The function {0} Cost {1:3f}s.\n".format(function.__name__, end - start))
         return result
+
     return wrapper
 
 
 @print_time
 def main():
-    print('test')
+    print("test")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

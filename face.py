@@ -1,15 +1,15 @@
 def test_gray(img_file):
     import cv2
+
     img = cv2.imread(img_file)
-     
 
     pass
-
 
 
 def test_camera():
     import numpy as np
     import cv2
+
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)  # set Width
     cap.set(4, 480)  # set Height
@@ -17,8 +17,8 @@ def test_camera():
         ret, frame = cap.read()
         frame = cv2.flip(frame, -1)  # Flip camera vertically
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('frame', frame)
-        cv2.imshow('gray', gray)
+        cv2.imshow("frame", frame)
+        cv2.imshow("gray", gray)
         k = cv2.waitKey()
         if k == 27:  # press 'ESC' to quit
             break
@@ -30,6 +30,7 @@ def test_camera2():
     import numpy as np
     import cv2
     from pathlib import Path
+
     cap = cv2.VideoCapture(1)
     cap.set(3, 640)  # set Width
     cap.set(4, 640)  # set Heightwhile(True):
@@ -40,15 +41,15 @@ def test_camera2():
         # frame = cv2.flip(frame, 0) # Flip camera vertically
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        cv2.imshow('frame', frame)
-        cv2.imshow('gray', gray)
+        cv2.imshow("frame", frame)
+        cv2.imshow("gray", gray)
         # cv2.imshow('blue', frame[:,:,0])
         edge = cv2.Canny(gray, 16, 200)
         blur = cv2.GaussianBlur(frame, (15, 15), 0)
         revert = 255 - frame
-        cv2.imshow('edge', edge)
-        cv2.imshow('blur', blur)
-        cv2.imshow('revert', revert)
+        cv2.imshow("edge", edge)
+        cv2.imshow("blur", blur)
+        cv2.imshow("revert", revert)
 
         k = cv2.waitKey()
         if k == 27:  # press 'ESC' to quit
@@ -63,10 +64,11 @@ def face_detect():
     import numpy as np
     import cv2
     from pathlib import Path
-    classifier_file1 = Path(
-        cv2.__file__).parent / 'data' / 'haarcascade_frontalface_default.xml'
-    classifier_file2 = Path(
-        cv2.__file__).parent / 'data' / 'haarcascade_eye.xml'
+
+    classifier_file1 = (
+        Path(cv2.__file__).parent / "data" / "haarcascade_frontalface_default.xml"
+    )
+    classifier_file2 = Path(cv2.__file__).parent / "data" / "haarcascade_eye.xml"
     faceCascade = cv2.CascadeClassifier(str(classifier_file1))
     eye_cascade = cv2.CascadeClassifier(str(classifier_file2))
     cap = cv2.VideoCapture(1)
@@ -77,26 +79,21 @@ def face_detect():
         # img = cv2.flip(img, -1)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = faceCascade.detectMultiScale(
-            gray,
-            scaleFactor=1.2,
-            minNeighbors=5,
-            minSize=(20, 20)
+            gray, scaleFactor=1.2, minNeighbors=5, minSize=(20, 20)
         )
-        for (x, y, w, h) in faces:
+        for x, y, w, h in faces:
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            roi_gray = gray[y:y + h, x:x + w]
-            roi_color = img[y:y + h, x:x + w]
+            roi_gray = gray[y : y + h, x : x + w]
+            roi_color = img[y : y + h, x : x + w]
             eyes = eye_cascade.detectMultiScale(
                 roi_gray,
                 scaleFactor=1.5,
                 minNeighbors=10,
                 minSize=(5, 5),
             )
-            for (ex, ey, ew, eh) in eyes:
-                cv2.rectangle(roi_color, (ex, ey),
-                              (ex + ew, ey + eh),
-                              (0, 255, 50), 2)
-        cv2.imshow('video', img)
+            for ex, ey, ew, eh in eyes:
+                cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 50), 2)
+        cv2.imshow("video", img)
         k = cv2.waitKey()
         if k == 27:  # press 'ESC' to quit
             break
@@ -114,8 +111,8 @@ def face_detection_dnn():
 
     # image_file = argv[1]
     # https://github.com/spmallick/learnopencv/blob/master/FaceDetectionComparison/models/deploy.prototxt
-    model_text = 'deploy.prototxt'
-    model_file = 'res10_300x300_ssd_iter_140000_fp16.caffemodel'
+    model_text = "deploy.prototxt"
+    model_file = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
 
     net = cv2.dnn.readNetFromCaffe(model_text, model_file)
 
@@ -135,15 +132,15 @@ def face_detection_dnn():
                 continue
             # compute the boxes (x, y)-coordinates
             box = detections[0, 0, i, 3:7] * np.array([width, height, width, height])
-            (x1, y1, x2, y2) = box.astype('int')
+            (x1, y1, x2, y2) = box.astype("int")
             if y1 - 10 > 10:
                 y = y1 - 10
             else:
                 y = y1 + 10
-            text = '{:.2f}'.format(confidence * 100)
+            text = "{:.2f}".format(confidence * 100)
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(frame, text, (x1, y), cv2.LINE_AA, 0.45, (0, 0, 255), 2)
-        cv2.imshow('video', frame)
+        cv2.imshow("video", frame)
         k = cv2.waitKey()
         if k == 27:  # press 'ESC' to quit
             break
@@ -151,31 +148,32 @@ def face_detection_dnn():
     cv2.destroyAllWindows()
     return
 
+
 def get_face2(frame):
     import numpy as np
     import cv2
     from pathlib import Path
-    classifier_file1 = Path(
-        cv2.__file__).parent / 'data' / 'haarcascade_frontalface_default.xml'
+
+    classifier_file1 = (
+        Path(cv2.__file__).parent / "data" / "haarcascade_frontalface_default.xml"
+    )
     faceCascade = cv2.CascadeClassifier(str(classifier_file1))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(
-        gray,
-        scaleFactor=1.2,
-        minNeighbors=5,
-        minSize=(20, 20)
+        gray, scaleFactor=1.2, minNeighbors=5, minSize=(20, 20)
     )
     result = list()
-    for (x, y, w, h) in faces:
-        result.append((x, x+w, y, y+h))
+    for x, y, w, h in faces:
+        result.append((x, x + w, y, y + h))
     return result
 
 
 def get_face(frame):
     import cv2
     import numpy as np
-    model_text = 'deploy.prototxt'
-    model_file = 'res10_300x300_ssd_iter_140000_fp16.caffemodel'
+
+    model_text = "deploy.prototxt"
+    model_file = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
 
     net = cv2.dnn.readNetFromCaffe(model_text, model_file)
     height, width = frame.shape[:2]
@@ -191,7 +189,7 @@ def get_face(frame):
             continue
         # compute the boxes (x, y)-coordinates
         box = detections[0, 0, i, 3:7] * np.array([width, height, width, height])
-        (x1, y1, x2, y2) = box.astype('int')
+        (x1, y1, x2, y2) = box.astype("int")
         if y1 - 10 > 10:
             y1 = y1 - 10
         else:
@@ -207,21 +205,21 @@ def get_face_imgs(number=5):
     from faker import Faker
     import requests
 
-    f = Faker(locale='en')
+    f = Faker(locale="en")
 
-    folder = Path('./train')
+    folder = Path("./train")
     if not folder.exists():
         folder.mkdir()
-    if len(list(folder.glob('*.webp'))) >= number:
+    if len(list(folder.glob("*.webp"))) >= number:
         return folder
-    url = 'https://thispersondoesnotexist.com/'
+    url = "https://thispersondoesnotexist.com/"
     number = 5
     for _ in range(number):
         r = requests.get(url)
-        filename = f.name() + '.webp'
-        out = open(folder/filename, 'wb')
+        filename = f.name() + ".webp"
+        out = open(folder / filename, "wb")
         out.write(r.content)
-        print('Got', filename)
+        print("Got", filename)
         sleep(2)
     return folder
 
@@ -234,30 +232,30 @@ def face_recognition():
     from pathlib import Path
 
     # train_folder = get_face_imgs()
-    train_folder = Path('./train')
+    train_folder = Path("./train")
     face_sample = list()
     names = list()
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     n = 0
     id_name = dict()
-    for img_file in train_folder.glob('*'):
-        print('Train', img_file)
+    for img_file in train_folder.glob("*"):
+        print("Train", img_file)
         name = img_file.stem
         id_name[n] = name
         img = cv2.imread(str(img_file))
         if img is None:
-            print('bad image', img_file)
+            print("bad image", img_file)
             continue
         # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = get_face(img)
-        #for face_box in faces:
+        # for face_box in faces:
         x1, y1, x2, y2 = faces[0]
         face = img[x1:x2, y1:y2]
         face_gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         face_sample.append(face_gray)
         names.append(n)
         n = n + 1
-    out_filename = 'trainer.yml'
+    out_filename = "trainer.yml"
     recognizer.train(face_sample, np.array(names))
     recognizer.write(out_filename)
     recognizer.read(out_filename)
@@ -270,13 +268,13 @@ def face_recognition():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = get_face(frame)
         if len(faces) == 0:
-            print('Face not found.')
+            print("Face not found.")
             continue
         for face in faces:
             x1, y1, x2, y2 = face
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
             gray_face = gray[x1:x2, y1:y2]
-            #if gray_face.size == 0:
+            # if gray_face.size == 0:
             #    continue
             try:
                 detect_id, confidence = recognizer.predict(gray_face)
@@ -285,15 +283,23 @@ def face_recognition():
             if 0 <= confidence <= 100:
                 detect_name = id_name[detect_id]
             else:
-                detect_name = 'unknown'
-            conf_text = ' {}%'.format(round(100-confidence))
-            cv2.putText(frame, detect_name+conf_text, (x1+5, y1+5), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (255, 255, 255), 2)
-        cv2.imshow('video', frame)
+                detect_name = "unknown"
+            conf_text = " {}%".format(round(100 - confidence))
+            cv2.putText(
+                frame,
+                detect_name + conf_text,
+                (x1 + 5, y1 + 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                2,
+            )
+        cv2.imshow("video", frame)
         k = cv2.waitKey()
         if k == 27:  # press 'ESC' to quit
             break
     cap.release()
     cv2.destroyAllWindows()
+
 
 face_recognition()

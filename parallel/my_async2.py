@@ -14,9 +14,13 @@ async def fetch(session, url):
 
 async def main():
     start = timer()
-    urls = ['https://www.baidu.com', 'https://www.qq.com',
-            'https://www.taobao.com',
-            'https://www.jd.com', 'https://www.sohu.com']
+    urls = [
+        "https://www.baidu.com",
+        "https://www.qq.com",
+        "https://www.taobao.com",
+        "https://www.jd.com",
+        "https://www.sohu.com",
+    ]
     task = []
     async with aiohttp.ClientSession() as session:
         for i in urls:
@@ -31,7 +35,7 @@ async def main():
     print(end - start)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # warn deprecated in python37
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(main())

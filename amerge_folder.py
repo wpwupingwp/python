@@ -11,7 +11,7 @@ async def write_to(s, d):
 
 
 async def merge_file(source, dest):
-    with open(source, 'rb') as s, open(dest, 'ab') as d:
+    with open(source, "rb") as s, open(dest, "ab") as d:
         await write_to(s, d)
 
 
@@ -19,11 +19,11 @@ async def main():
     """
     Try to use asyncio.
     """
-    print('python3 amerge_folder.py source dest')
+    print("python3 amerge_folder.py source dest")
     source_dir = Path(argv[1]).absolute()
     dest_dir = Path(argv[2]).absolute()
-    sources = set(i.name for i in source_dir.glob('*'))
-    dests = set(i.name for i in dest_dir.glob('*'))
+    sources = set(i.name for i in source_dir.glob("*"))
+    dests = set(i.name for i in dest_dir.glob("*"))
     to_merge = dests.intersection(sources)
     to_move = sources.difference(dests)
     for j in to_move:

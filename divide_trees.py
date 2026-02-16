@@ -10,30 +10,32 @@ from Bio import Phylo
 
 def parse_info(arg):
     """
-Format of info file:
-Type1
-A:,taxon1,taxon2,taxon3
-B:,taxon4,taxon5,taxon6
-C:,taxon9,taxon3,taxon7
-Type2
-A:,taxon7,taxon8,taxon9
-B:,taxon4,taxon5,taxon6
-Type3
-A:,taxon1,taxon2,taxon3
-B:,taxon8,taxon9,taxon10
+    Format of info file:
+    Type1
+    A:,taxon1,taxon2,taxon3
+    B:,taxon4,taxon5,taxon6
+    C:,taxon9,taxon3,taxon7
+    Type2
+    A:,taxon7,taxon8,taxon9
+    B:,taxon4,taxon5,taxon6
+    Type3
+    A:,taxon1,taxon2,taxon3
+    B:,taxon8,taxon9,taxon10
     """
     info = dict()
     with open(arg.info) as raw:
         for line in raw:
-            if line.startswith('Type'):
+            if line.startswith("Type"):
                 type_name = line.strip()
                 info[type_name] = dict()
                 continue
-            group_name, taxon = line.strip().split(' ')
-            group_name = group_name.split(':')[0]
-            taxon = taxon.split(',')
+            group_name, taxon = line.strip().split(" ")
+            group_name = group_name.split(":")[0]
+            taxon = taxon.split(",")
             if not isinstance(taxon, list):
-                taxon = [taxon, ]
+                taxon = [
+                    taxon,
+                ]
             info[type_name][group_name] = taxon
         info[type_name][group_name] = taxon
     return info
@@ -41,9 +43,9 @@ B:,taxon8,taxon9,taxon10
 
 def is_root(tree, clade):
     if clade == tree.root:
-        return 'is_root'
+        return "is_root"
     else:
-        return 'not_root'
+        return "not_root"
 
 
 def get_mrca(tree, names):
@@ -120,16 +122,16 @@ def divide_trees(trees, info, types):
     fail = 0
     for t in trees:
         try:
-            tree = Phylo.read(t, 'newick').as_phyloxml()
+            tree = Phylo.read(t, "newick").as_phyloxml()
         except Exception:
-            print('Ignore', t)
+            print("Ignore", t)
         non_bifurcating = get_non_bifurcating(tree, tree.get_terminals())
         # print(non_bifurcating)
         for i in non_bifurcating:
-            i.color = 'green'
+            i.color = "green"
         for type_ in info:
-            ok = ''
-            color = ['orange', 'green', 'blue', 'red']
+            ok = ""
+            color = ["orange", "green", "blue", "red"]
             terminals = []
             mrcas = {}
             for group in info[type_]:
@@ -144,30 +146,33 @@ def divide_trees(trees, info, types):
                 if result[group]:
                     confidence = mrcas[group].confidence
                     if confidence is None:
-                        confidence = 'undefined'
+                        confidence = "undefined"
                     else:
                         confidence = confidence.value
                     results.append([t, type_, confidence])
-                    ok = ' OK'
+                    ok = " OK"
             # Phylo.draw(tree, do_show=False, title=(type_+ok,),
             for i in non_bifurcating:
-                i.color = 'green'
-            Phylo.draw(tree, do_show=False, title=(type_+ok,),
-                       savefig=(t.with_suffix(f'.{type_}.pdf'),))
+                i.color = "green"
+            Phylo.draw(
+                tree,
+                do_show=False,
+                title=(type_ + ok,),
+                savefig=(t.with_suffix(f".{type_}.pdf"),),
+            )
             # release memory, or matplotlib will break down
-            plt.close('all')
-    print('success', success)
-    print('fail', fail)
+            plt.close("all")
+    print("success", success)
+    print("fail", fail)
     return results
 
 
 def parse_args():
     arg = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=main.__doc__)
-    arg.add_argument('-info', required=True,
-                     help='info of taxons to be clusterd')
-    arg.add_argument('-folder', required=True, help='folder contains trees')
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description=main.__doc__
+    )
+    arg.add_argument("-info", required=True, help="info of taxons to be clusterd")
+    arg.add_argument("-folder", required=True, help="folder contains trees")
     arg.print_usage()
     return arg.parse_args()
 
@@ -177,24 +182,24 @@ def main():
     Divide trees according to type of topology.
     """
     arg = parse_args()
-    print('Start.')
+    print("Start.")
     arg.folder = Path(arg.folder)
-    trees = list(arg.folder.glob('*'))
+    trees = list(arg.folder.glob("*"))
     trees = [i.absolute() for i in trees]
     info = parse_info(arg)
-    types = [arg.folder/i for i in info.keys()]
+    types = [arg.folder / i for i in info.keys()]
     types_dict = dict(zip(info.keys(), types))
     for i in types:
         i.mkdir()
     result = divide_trees(trees, info, types)
-    result_csv = arg.folder / 'result.csv'
-    with open(result_csv, 'w') as out:
-        out.write('Tree,Type,Confidence\n')
+    result_csv = arg.folder / "result.csv"
+    with open(result_csv, "w") as out:
+        out.write("Tree,Type,Confidence\n")
         for i in result:
-            out.write('{},{},{}\n'.format(*i))
-            Path(types_dict[i[1]]/i[0].name).write_text(i[0].read_text())
-    print('Done.')
+            out.write("{},{},{}\n".format(*i))
+            Path(types_dict[i[1]] / i[0].name).write_text(i[0].read_text())
+    print("Done.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

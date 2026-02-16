@@ -859,19 +859,19 @@ Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-US) AppleWebKit/530.5 (KHTM
 
 def open_url(url, useragent):
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--user-agent="'+useragent+'"')
+    chrome_options.add_argument('--user-agent="' + useragent + '"')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     driver.get(url)
     distance = random.randint(100, 500)
-    driver.execute_script(f'window.scrollTo(0, {distance})')
-    driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
+    driver.execute_script(f"window.scrollTo(0, {distance})")
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
     time.sleep(random.randint(0, 3))
     driver.close()
     return
 
 
-if __name__ == '__main__':
-    url = 'https://mp.weixin.qq.com/s/SOxSM4qoJg2qd-DxIhQG9Q'
+if __name__ == "__main__":
+    url = "https://mp.weixin.qq.com/s/SOxSM4qoJg2qd-DxIhQG9Q"
     ua_list = get_ua()
     number = 100
     results = []

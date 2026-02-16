@@ -8,18 +8,16 @@ import tkinter as tk
 import argparse
 
 
-def wlabel(window, text, row, column=0, width=25, padx=0, pady=0, sticky='ew',
-           **kargs):
+def wlabel(window, text, row, column=0, width=25, padx=0, pady=0, sticky="ew", **kargs):
     """
     Generate and pack labels.
     """
-    label = ttk.Label(window, text=text, width=width, anchor=tk.CENTER,
-                      **kargs)
+    label = ttk.Label(window, text=text, width=width, anchor=tk.CENTER, **kargs)
     label.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky)
     return label
 
 
-def fentry(window, row, column, default='', padx=0, pady=0):
+def fentry(window, row, column, default="", padx=0, pady=0):
     """
     Generate and pack entrys.
     Fill with default string.
@@ -33,117 +31,120 @@ def fentry(window, row, column, default='', padx=0, pady=0):
 def open_file(title, entry, write=False):
     def func():
         if write:
-            a= filedialog.asksaveasfilename(title=title)
+            a = filedialog.asksaveasfilename(title=title)
         else:
             a = filedialog.askopenfilename(title=title)
-        entry.delete(0, 'end')
+        entry.delete(0, "end")
         entry.insert(0, a)
+
     return func
 
 
 def ui():
     def submit():
-        arg_str = ''
+        arg_str = ""
         arp = arp_entry.get()
         hap = hap_entry.get()
         out = out_entry.get()
         if not all([arp, hap, out]):
-            messagebox.showinfo(message='Input is required!')
+            messagebox.showinfo(message="Input is required!")
         combine(arp, hap, out)
-        messagebox.showinfo(message='Done.')
+        messagebox.showinfo(message="Done.")
         return
 
     global root
     root = tk.Tk()
-    root.attributes('-topmost', 'true')
-    root.title('arp_hap_to_nex')
-    root.geometry('500x200')
+    root.attributes("-topmost", "true")
+    root.title("arp_hap_to_nex")
+    root.geometry("500x200")
     root_frame = ttk.Frame(root)
-    root_frame.place(relx=0.5, rely=0.5, anchor='center')
+    root_frame.place(relx=0.5, rely=0.5, anchor="center")
     row = 0
-    wlabel(root_frame, 'arp file', row=row, column=1)
+    wlabel(root_frame, "arp file", row=row, column=1)
     arp_entry = fentry(root_frame, row=row, column=2)
-    arp_button = ttk.Button(root_frame, text='Open', command=open_file(
-        'arp file', arp_entry))
+    arp_button = ttk.Button(
+        root_frame, text="Open", command=open_file("arp file", arp_entry)
+    )
     arp_button.grid(row=row, column=3)
     row += 1
-    wlabel(root_frame, 'hap file', row=row, column=1)
+    wlabel(root_frame, "hap file", row=row, column=1)
     hap_entry = fentry(root_frame, row=row, column=2)
-    hap_button = ttk.Button(root_frame, text='Open', command=open_file(
-        'hap file', hap_entry))
+    hap_button = ttk.Button(
+        root_frame, text="Open", command=open_file("hap file", hap_entry)
+    )
     hap_button.grid(row=row, column=3)
     row += 1
-    wlabel(root_frame, 'Output', row=row, column=1)
+    wlabel(root_frame, "Output", row=row, column=1)
     out_entry = fentry(root_frame, row=row, column=2)
-    o_button = ttk.Button(root_frame, text='Open',
-                          command=open_file('output file', out_entry,
-                                            write=True))
+    o_button = ttk.Button(
+        root_frame, text="Open", command=open_file("output file", out_entry, write=True)
+    )
     o_button.grid(row=row, column=3)
     row += 1
-    ok = ttk.Button(root_frame, text='Enter', command=submit)
-    ok.grid(row=row, column=0, columnspan=4, sticky='EW', padx=90, pady=20)
+    ok = ttk.Button(root_frame, text="Enter", command=submit)
+    ok.grid(row=row, column=0, columnspan=4, sticky="EW", padx=90, pady=20)
     row += 1
-    wlabel(root_frame, 'For ZC', row=row, column=3)
+    wlabel(root_frame, "For ZC", row=row, column=3)
     root.mainloop()
 
 
 def write_hap(hap_file: Path, nex_file: Path) -> list:
     samples = []
-    with open(hap_file, 'r') as hap, open(nex_file, 'w') as nex:
+    with open(hap_file, "r") as hap, open(nex_file, "w") as nex:
         ntax = 0
         for line in hap:
             ntax += 1
-        nchar = len(line.strip().split(' ')[-1])
+        nchar = len(line.strip().split(" ")[-1])
         hap.seek(0)
-        data_head = f'''#NEXUS
+        data_head = f"""#NEXUS
 Begin Data;
 Dimensions ntax={ntax} nchar={nchar};
 Format datatype=DNA missing=N gap=-;
 Matrix
-'''
+"""
         nex.write(data_head)
         hap.seek(0)
         for line in hap:
-            samples.append(line.split(' ')[0])
+            samples.append(line.split(" ")[0])
             nex.write(line)
-        data_tail = ''';
-END;'''
+        data_tail = """;
+END;"""
         nex.write(data_tail)
     return samples
 
 
 def write_arp(arp_file: Path, nex_file: Path, samples: list) -> Path:
     labels = list()
-    arp = open(arp_file, 'r')
-    nex = open(nex_file, 'a')
+    arp = open(arp_file, "r")
+    nex = open(nex_file, "a")
     record = []
-    name = ''
+    name = ""
     for line in arp:
-        if line.startswith('[[Samples]]'):
+        if line.startswith("[[Samples]]"):
             break
     traits_dict = {i: None for i in labels}
     for line in arp:
         if len(line.strip()) == 0:
             break
-        if line.strip().startswith('SampleName'):
+        if line.strip().startswith("SampleName"):
             name = line.split('"')[1]
             labels.append(name)
-        elif line.strip().startswith('SampleSize'):
+        elif line.strip().startswith("SampleSize"):
             continue
-        elif line.strip().startswith('SampleData'):
+        elif line.strip().startswith("SampleData"):
             record = []
-        elif line.strip().startswith('}'):
+        elif line.strip().startswith("}"):
             traits_dict[name] = record
         else:
-            record.append(line.strip().split(' '))
-    labels_str = '\t'.join(labels)
-    head = f'''
+            record.append(line.strip().split(" "))
+    labels_str = "\t".join(labels)
+    head = f"""
 Begin Traits;
 Dimensions NTraits={len(labels)};
 format labels=yes missing=? separator=Tab;
 TraitLabels	{labels_str};
 Matrix
-'''
+"""
     nex.write(head)
     for sample in samples:
         record_dict = {label: 0 for label in labels}
@@ -151,11 +152,11 @@ Matrix
             for r in record:
                 if r[0] == sample:
                     record_dict[label] = r[1]
-        content = '\t'.join([str(record_dict[i]) for i in labels])
-        nex.write(f'{sample}\t{content}\n')
-    tail = ''';
+        content = "\t".join([str(record_dict[i]) for i in labels])
+        nex.write(f"{sample}\t{content}\n")
+    tail = """;
 END; 
-'''
+"""
     nex.write(tail)
     return nex_file
 
@@ -171,11 +172,11 @@ def combine(arp, hap, out):
 
 def parse_args():
     arg = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=main.__doc__)
-    arg.add_argument('-arp', help='arp file')
-    arg.add_argument('-hap', help='hap file')
-    arg.add_argument('-out', help='out file')
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter, description=main.__doc__
+    )
+    arg.add_argument("-arp", help="arp file")
+    arg.add_argument("-hap", help="hap file")
+    arg.add_argument("-out", help="out file")
     return arg.parse_args()
 
 
@@ -189,8 +190,8 @@ def main():
         ui()
     else:
         combine(arg.arp, arg.hap, arg.out)
-        print('Done.')
+        print("Done.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

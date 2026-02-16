@@ -7,8 +7,14 @@ from urllib.request import urlopen
 from timeit import default_timer as timer
 
 
-urls = ['https://www.baidu.com', 'https://www.qq.com', 'https://www.taobao.com',
-        'https://www.jd.com', 'https://www.sohu.com']
+urls = [
+    "https://www.baidu.com",
+    "https://www.qq.com",
+    "https://www.taobao.com",
+    "https://www.jd.com",
+    "https://www.sohu.com",
+]
+
 
 def get(url):
     a = urlopen(url)
@@ -24,7 +30,7 @@ def main():
             print(future.result())
     pool.shutdown(wait=True)
     end = timer()
-    print('thread pool', end-start)
+    print("thread pool", end - start)
 
     start = timer()
     pool2 = ThreadPoolExecutor(max_workers=8)
@@ -33,7 +39,7 @@ def main():
     for future in futures:
         print(future.result())
     end = timer()
-    print('thread pool2', end-start)
+    print("thread pool2", end - start)
 
     start = timer()
     pool3 = ProcessPoolExecutor(max_workers=4)
@@ -45,5 +51,5 @@ def main():
 
 
 # in Windows, ProcessExecutorPool has to call main()
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

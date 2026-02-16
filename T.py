@@ -8,7 +8,7 @@ while True:
     try:
         raw = pandas.read_excel(argv[1], sheetname=index)
         t = raw.T
-        t.to_csv('{}-{}.tsv'.format(argv[1], index), sep='\t')
+        t.to_csv("{}-{}.tsv".format(argv[1], index), sep="\t")
         index += 1
     except:
         break

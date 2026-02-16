@@ -12,7 +12,7 @@ class ListNode:
         while tmp:
             s.append(tmp.val)
             tmp = tmp.next
-        return '->'.join([str(i) for i in s])
+        return "->".join([str(i) for i in s])
 
     def append(self, x):
         while self.next:
@@ -46,8 +46,8 @@ class ListNode:
 l1 = ListNode(1)
 for i in (2, 2, 30):
     l1.append(i)
-print(f'l1 {l1}')
+print(f"l1 {l1}")
 l2 = ListNode(3)
 l2.extend([5, 6, 10])
-print('l2', l2)
-print('merge', ListNode.merge(l1, l2))
+print("l2", l2)
+print("merge", ListNode.merge(l1, l2))

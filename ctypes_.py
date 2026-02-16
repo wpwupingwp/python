@@ -13,9 +13,11 @@ long long func(long long n)
     return result;
 }
 """
-dll = cdll.LoadLibrary(r'g:\c.dll')
+dll = cdll.LoadLibrary(r"g:\c.dll")
 func = dll.func
-func.argtypes = [c_uint64, ]
+func.argtypes = [
+    c_uint64,
+]
 func.restype = c_uint64
 print(func(2**30))
 # char

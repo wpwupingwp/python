@@ -9,7 +9,7 @@ import argparse
 
 def function(parameters):
     string, filename = parameters
-    string = string.replace('files', '{0}')
+    string = string.replace("files", "{0}")
     string = string.format(filename)
     print(string)
     run(string, shell=True)
@@ -19,10 +19,11 @@ def function(parameters):
 def main():
     start = timer()
     arg = argparse.ArgumentParser()
-    arg.add_argument('command',
-                     help='command to run, use "files" to stand for file name')
-    arg.add_argument('-f', '--files')
-    arg.add_argument('-c', '--cpu', type=int, default=cpu_count()-1)
+    arg.add_argument(
+        "command", help='command to run, use "files" to stand for file name'
+    )
+    arg.add_argument("-f", "--files")
+    arg.add_argument("-c", "--cpu", type=int, default=cpu_count() - 1)
     arg = arg.parse_args()
 
     files = glob(arg.files)
@@ -36,8 +37,8 @@ def main():
     pool.join()
     end = timer()
 
-    print('\nFinished with {0:.3f}s.\n'.format(end-start))
+    print("\nFinished with {0:.3f}s.\n".format(end - start))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

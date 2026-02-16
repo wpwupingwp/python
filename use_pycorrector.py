@@ -7,14 +7,14 @@ import pycorrector as p
 
 
 start = timer()
-raw = open('/data/manuscript.txt', 'r', encoding='utf-8')
-out = open('/data/output.txt', 'w', encoding='utf-8')
+raw = open("/data/manuscript.txt", "r", encoding="utf-8")
+out = open("/data/output.txt", "w", encoding="utf-8")
 for line in raw:
     corrected, detail = p.correct(line.strip())
-    out.write(corrected.strip()+'\n')
+    out.write(corrected.strip() + "\n")
     for i in detail:
         if len(i) == 4:
-            out.write('{},{},{}-{}\t'.format(*i))
-            out.write('\n')
+            out.write("{},{},{}-{}\t".format(*i))
+            out.write("\n")
 end = timer()
-print(end-start, 'seconds.')
+print(end - start, "seconds.")

@@ -13,8 +13,7 @@ class Vector:
         return Vector(self.x + y.x, self.y + y.y, self.z + y.z)
 
     def __abs__(self):
-        return pow(sum([self.x * self.x, self.y * self.y, self.z * self.z]),
-                   0.5)
+        return pow(sum([self.x * self.x, self.y * self.y, self.z * self.z]), 0.5)
 
     def __mul__(self, y):
         if isinstance(y, Vector):
@@ -25,7 +24,7 @@ class Vector:
 
 a = Vector(1, 0, 1)
 b = Vector(-1, 10, -1)
-print('a', a)
-print('b', b)
-for c in ['a*3', 'a+b', 'a*b', 'b*a', 'abs(b)', 'a*a']:
+print("a", a)
+print("b", b)
+for c in ["a*3", "a+b", "a*b", "b*a", "abs(b)", "a*a"]:
     print(c, eval(c))
