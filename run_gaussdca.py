@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Iterable
 import numpy as np
 
+
 def parse_fasta(fasta_file: Path) -> Iterable[tuple[str, str]]:
     """
     Import from treebarcode.
@@ -68,46 +69,64 @@ def call_julia(fasta):
 
 def main():
     # multithread cause numpy failed to read from julia
-    print('Run: uv run python3 -X juliacall-threads=1 run_gaussdca.py protein.aln')
-    print('Add package: pkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
+    print('Usage:')
+    print('\tuv run python3 -X juliacall-threads=1 run_gaussdca.py input.aln')
+    print('Add package:')
+    print('\tpkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
 
     fasta = Path(argv[1]).resolve()
     result = fasta.with_suffix('.txt')
     co = fasta.with_suffix('.co.aln')
     non_co = fasta.with_suffix('.non_co.aln')
+    co_half = fasta.with_suffix('.co_half.aln')
+    non_co_half = fasta.with_suffix('.non_co_half.aln')
     invariant = fasta.with_suffix('.invariant.aln')
+    all_except_half_co = fasta.with_suffix('.all_except_half_co.aln')
+
     name, old_seq = aln_to_array(parse_fasta(fasta))
-    unique_counts = np.array([len(np.unique(old_seq[:, i])) for i in range(old_seq.shape[1])])
-    invariant_index = np.where(unique_counts==1)[0]
+    unique_counts = np.array(
+        [len(np.unique(old_seq[:, i])) for i in range(old_seq.shape[1])])
+    invariant_index = np.where(unique_counts == 1)[0]
     invariant_site = old_seq[:, invariant_index]
-    mutant_index = np.where(unique_counts>1)[0]
+    # mutant_index = np.where(unique_counts > 1)[0]
 
     fnr = call_julia(str(fasta))
     # convert from numpy.void
     np_array = np.array([list(i) for i in fnr.to_numpy()])
+    np.savetxt(result, np_array, fmt=['%d', '%d', '%.18e'])
+
     # start with 1->0
     np_array[:, :2] -= 1
     # todo: how to set threshold?
     # strong coupling
     threshold = 0.75
-    np_array2 = np_array[np_array[:, 2]>threshold]
+    np_array2 = np_array[np_array[:, 2] > threshold]
+    all_index = set(np.arange(0, old_seq.shape[1]))
     co_index = set(np_array2[:, :2].flatten().astype(int))
-    non_co_index = set(np.arange(0, old_seq.shape[1])) - co_index - set(invariant_index)
-    np.unique(non_co_index, return_counts=True)
+    co_half_index = set(np_array2[:, 0].flatten().astype(int))
+    non_co_index = all_index - co_index - set(invariant_index)
+    non_co_half_index = all_index - co_half_index - set(invariant_index)
+    all_except_half_index = all_index - co_half_index
     # output
     co_site = old_seq[:, list(co_index)]
     non_co_site = old_seq[:, list(non_co_index)]
+    co_half_site = old_seq[:, list(co_half_index)]
+    non_co_half_site = old_seq[:, list(non_co_half_index)]
+    all_except_half_site = old_seq[:, list(all_except_half_index)]
     print(old_seq.shape[1], 'columns\n',
           np_array.shape[0], 'pairs\n',
           np_array2.shape[0], 'pairs big score\n',
           invariant_index.shape[0], 'invariant sites\n',
-          len(co_index), 'coevolution sites\n', 
+          len(co_index), 'coevolution sites\n',
           len(non_co_index), 'non-coevoled sites')
-    np.savetxt(result, np_array, fmt=['%d', '%d', '%.18e'])
     array_to_fasta(name, co_site, co)
     array_to_fasta(name, non_co_site, non_co)
     array_to_fasta(name, invariant_site, invariant)
-    print(result, co, non_co)
+    array_to_fasta(name, co_half_site, co_half)
+    array_to_fasta(name, non_co_half_site, non_co_half)
+    array_to_fasta(name, all_except_half_site, all_except_half_co)
+    # print(result, co, non_co, co_half, non_co_half)
+    print('Done!')
     return
 
 
