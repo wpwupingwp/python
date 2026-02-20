@@ -4,10 +4,6 @@ from pathlib import Path
 from typing import Iterable
 import numpy as np
 
-
-# multithread cause numpy failed to read from julia
-print('Run: uv run python3 -X juliacall-threads=1 run_gaussdca.py protein.aln')
-print('Add package: pkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
 def parse_fasta(fasta_file: Path) -> Iterable[tuple[str, str]]:
     """
     Import from treebarcode.
@@ -53,27 +49,63 @@ def aln_to_array(records: Iterable[tuple[str, str]]) -> tuple[
         [np.fromiter(i[1], dtype=np.dtype('S1')) for i in records_])
     return name_array, seq_array
 
-fasta = Path(argv[1]).resolve()
-result = fasta.with_suffix('.txt')
-co = fasta.with_suffix('.co.aln')
-non_co = fasta.with_suffix('.non_co.aln')
 
-name, old_seq = aln_to_array(parse_fasta(fasta))
-jl.seval("using GaussDCA")
-fnr = jl.gDCA(str(fasta))
-# jl.printrank(str(result), fnr)
-# convert from numpy.void
-np_array = np.array([list(i) for i in fnr.to_numpy()])
-threshold = 0
-np_array[:, 0] -= 1
-np_array2 = np_array[np_array[:2]>threshold]
-co_index = set(np_array2[:, :2].flatten().astype(int))
-non_co_index = set(np.arange(0, old_seq.shape[1])) - co_index
-print(old_seq.shape[1], 'columns', np_array.shape[0], 'pairs',
-      np_array2.shape[0], 'pairs big score',
-      len(co_index), 'coevolution sites', 
-      len(non_co_index), 'non-coevoled sites')
-np.savetxt(result, np_array, fmt=['%d', '%d', '%.18e'])
-write_fasta(zip(name, old_seq[:, list(co_index)]), co)
-write_fasta(zip(name, old_seq[:, list(non_co_index)]), non_co)
-print(result, co, non_co)
+def array_to_fasta(name_array: np.ndarray, seq_array: np.ndarray,
+                   output: Path) -> Path:
+    # convert dtype='S1' to strings
+    seq_list = list()
+    for row in seq_array:
+        seq_list.append(b''.join(row).decode('ascii'))
+    return write_fasta(zip(name_array, seq_list), output)
+
+
+def call_julia(fasta):
+    jl.seval("using GaussDCA")
+    fnr = jl.gDCA(str(fasta))
+    # jl.printrank(str(result), fnr)
+    return fnr
+
+
+def main():
+    # multithread cause numpy failed to read from julia
+    print('Run: uv run python3 -X juliacall-threads=1 run_gaussdca.py protein.aln')
+    print('Add package: pkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
+
+    fasta = Path(argv[1]).resolve()
+    result = fasta.with_suffix('.txt')
+    co = fasta.with_suffix('.co.aln')
+    non_co = fasta.with_suffix('.non_co.aln')
+    invariant = fasta.with_suffix('.invariant.aln')
+    name, old_seq = aln_to_array(parse_fasta(fasta))
+    unique_counts = np.array([len(np.unique(old_seq[:, i])) for i in range(old_seq.shape[1])])
+    invariant_site = old_seq[:, (unique_counts == 1)]
+    print(invariant_site.shape, unique_counts.ndim)
+
+    fnr = call_julia(str(fasta))
+    # convert from numpy.void
+    np_array = np.array([list(i) for i in fnr.to_numpy()])
+    # start with 1->0
+    np_array[:, :2] -= 1
+    # todo: how to set threshold?
+    threshold = 1
+    np_array2 = np_array[np_array[:, 2]>threshold]
+    co_index = set(np_array2[:, :2].flatten().astype(int))
+    non_co_index = set(np.arange(0, old_seq.shape[1])) - co_index
+    np.unique(non_co_index, return_counts=True)
+    # output
+    co_site = old_seq[:, list(co_index)]
+    non_co_site = old_seq[:, list(non_co_index)]
+    print(old_seq.shape[1], 'columns\n', 
+          np_array.shape[0], 'pairs\n',
+          np_array2.shape[0], 'pairs big score\n',
+          len(co_index), 'coevolution sites\n', 
+          len(non_co_index), 'non-coevoled sites')
+    np.savetxt(result, np_array, fmt=['%d', '%d', '%.18e'])
+    array_to_fasta(name, co_site, co)
+    array_to_fasta(name, non_co_site, non_co)
+    array_to_fasta(name, invariant_site, invariant)
+    print(result, co, non_co)
+    return
+
+
+main()
