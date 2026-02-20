@@ -78,8 +78,9 @@ def main():
     invariant = fasta.with_suffix('.invariant.aln')
     name, old_seq = aln_to_array(parse_fasta(fasta))
     unique_counts = np.array([len(np.unique(old_seq[:, i])) for i in range(old_seq.shape[1])])
-    invariant_site = old_seq[:, (unique_counts == 1)]
-    print(invariant_site.shape, unique_counts.ndim)
+    invariant_index = np.where(unique_counts==1)[0]
+    invariant_site = old_seq[:, invariant_index]
+    mutant_index = np.where(unique_counts>1)[0]
 
     fnr = call_julia(str(fasta))
     # convert from numpy.void
@@ -87,17 +88,19 @@ def main():
     # start with 1->0
     np_array[:, :2] -= 1
     # todo: how to set threshold?
-    threshold = 1
+    # strong coupling
+    threshold = 0.75
     np_array2 = np_array[np_array[:, 2]>threshold]
     co_index = set(np_array2[:, :2].flatten().astype(int))
-    non_co_index = set(np.arange(0, old_seq.shape[1])) - co_index
+    non_co_index = set(np.arange(0, old_seq.shape[1])) - co_index - set(invariant_index)
     np.unique(non_co_index, return_counts=True)
     # output
     co_site = old_seq[:, list(co_index)]
     non_co_site = old_seq[:, list(non_co_index)]
-    print(old_seq.shape[1], 'columns\n', 
+    print(old_seq.shape[1], 'columns\n',
           np_array.shape[0], 'pairs\n',
           np_array2.shape[0], 'pairs big score\n',
+          invariant_index.shape[0], 'invariant sites\n',
           len(co_index), 'coevolution sites\n', 
           len(non_co_index), 'non-coevoled sites')
     np.savetxt(result, np_array, fmt=['%d', '%d', '%.18e'])
