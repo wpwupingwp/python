@@ -5,13 +5,15 @@ import numpy as np
 from run_gaussdca import parse_fasta, aln_to_array, array_to_fasta
 
 
-def find_seqs(a, b, name, seq):
+def find_seqs(a: int, b: int, name: np.ndarray, seq: np.ndarray) -> tuple[
+    np.ndarray, np.ndarray]:
     seq_other = np.delete(seq, [a, b], axis=1)
     new_seq, count = np.unique(seq_other, return_counts=True, axis=0)
     other_same_seq = new_seq[np.argmax(count)]
     same_mask = np.all(seq_other == other_same_seq, axis=1)
     same_name = name[same_mask]
     same_seq = seq[same_mask]
+    # print(np.sum(same_mask))
     return same_name, same_seq
 
 
@@ -24,13 +26,16 @@ def main():
     unique_seq, unique_index = np.unique(raw_seq, return_index=True, axis=0)
     unique_name_ = raw_name[unique_index]
 
-    n_gaps = np.sum(unique_seq==b'-', axis=0)
+    n_gaps = np.sum(unique_seq==b'-', axis=1)
     no_gap_index = np.where(n_gaps == 0)[0]
-    no_gap_seq = unique_seq[no_gap_index]
-    no_gap_name = unique_name_[no_gap_seq]
+    no_gap_seq = unique_seq[no_gap_index, :]
+    no_gap_name = unique_name_[no_gap_index]
+    # no_gap_seq = unique_seq.copy()
+    # no_gap_name = unique_name_.copy()
 
     dca_array = np.loadtxt(dca_file)
-    top_n = 10
+    dca_array[:, :2] -= 1
+    top_n = 20
     dca_top = dca_array[:top_n]
     for record in dca_top:
         a, b, score = record
@@ -43,8 +48,13 @@ def main():
             continue
         filename = raw_aln_file.with_suffix(f'.{a}-{b}.aln')
         name, seq = find_seqs(a, b, no_gap_name, no_gap_seq)
-        if name:
-            array_to_fasta(name, seq, filename)
+        if len(name) < 2:
+            print(f'Insufficient records of {a}-{b}: {len(name)}')
+            continue
+        else:
+            print(f'Found {len(name)} records of {a}-{b}')
+        array_to_fasta(name, seq, filename)
+    print('done')
     return
 
 
