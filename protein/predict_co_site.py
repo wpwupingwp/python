@@ -1,14 +1,8 @@
-"""
-1. no mutant
-2. 1st mutant
-3. 2nd mutant
-4. both mutant
-"""
 from sys import argv
 from pathlib import Path
 import numpy as np
 
-from run_gaussdca import parse_fasta, aln_to_array, array_to_fasta, write_fasta
+from run_gaussdca import parse_fasta, aln_to_array, array_to_fasta
 
 
 def find_seqs(a, b, name, seq):

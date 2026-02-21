@@ -1,4 +1,3 @@
-from juliacall import Main as jl
 from sys import argv
 from pathlib import Path
 from typing import Iterable
@@ -61,6 +60,7 @@ def array_to_fasta(name_array: np.ndarray, seq_array: np.ndarray,
 
 
 def call_julia(fasta):
+    from juliacall import Main as jl
     jl.seval("using GaussDCA")
     fnr = jl.gDCA(str(fasta))
     # jl.printrank(str(result), fnr)
@@ -130,4 +130,5 @@ def main():
     return
 
 
-main()
+if __name__ == '__main__':
+    main()
