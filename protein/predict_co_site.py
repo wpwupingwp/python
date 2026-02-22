@@ -35,7 +35,7 @@ def main():
 
     dca_array = np.loadtxt(dca_file)
     dca_array[:, :2] -= 1
-    top_n = 20
+    top_n = 3
     dca_top = dca_array[:top_n]
     for record in dca_top:
         a, b, score = record
@@ -46,10 +46,10 @@ def main():
         if a == 0 or b == raw_seq.shape[1]:
             print('bad index', record)
             continue
-        filename = raw_aln_file.with_suffix(f'.{a}-{b}.aln')
+        filename = raw_aln_file.with_suffix(f'.{a+1}-{b+1}.aln')
         name, seq = find_seqs(a, b, no_gap_name, no_gap_seq)
         if len(name) < 2:
-            print(f'Insufficient records of {a}-{b}: {len(name)}')
+            print(f'Insufficient records of {a+1}-{b+1}: {len(name)}')
             continue
         else:
             print(f'Found {len(name)} records of {a}-{b}')
