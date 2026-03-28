@@ -61,6 +61,8 @@ def array_to_fasta(name_array: np.ndarray, seq_array: np.ndarray,
 
 def call_julia(fasta):
     from juliacall import Main as jl
+    jl.seval('import Pkg')
+    jl.seval('Pkg.add(url="https://github.com/carlobaldassi/GaussDCA.jl")')
     jl.seval("using GaussDCA")
     fnr = jl.gDCA(str(fasta))
     # jl.printrank(str(result), fnr)
@@ -71,8 +73,8 @@ def main():
     # multithread cause numpy failed to read from julia
     print('Usage:')
     print('\tuv run python3 -X juliacall-threads=1 run_gaussdca.py input.aln')
-    print('Add package:')
-    print('\tpkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
+    # print('Add package:')
+    # print('\tpkg> add "https://github.com/carlobaldassi/GaussDCA.jl"')
 
     fasta = Path(argv[1]).resolve()
     result = fasta.with_suffix('.txt')
