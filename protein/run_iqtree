@@ -1,1 +1,1 @@
-iqtree2 -s x -cmax 4 -bb 1000 -T 24
+iqtree2 -s x -cmax 4 -bb 1000 -T 24 -czb
